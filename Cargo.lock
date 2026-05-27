@@ -3162,13 +3162,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "minecraft"
-version = "0.1.0"
-dependencies = [
- "bevy",
-]
-
-[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4012,6 +4005,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
 
 [[package]]
+name = "rc-input"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
+name = "rc-player"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-input",
+]
+
+[[package]]
+name = "rc-render"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-voxel",
+]
+
+[[package]]
+name = "rc-voxel"
+version = "0.1.0"
+
+[[package]]
+name = "rc-world"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-render",
+ "rc-voxel",
+]
+
+[[package]]
 name = "read-fonts"
 version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4149,6 +4178,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
 dependencies = [
  "semver",
+]
+
+[[package]]
+name = "rustcraft"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-input",
+ "rc-player",
+ "rc-render",
+ "rc-voxel",
+ "rc-world",
 ]
 
 [[package]]

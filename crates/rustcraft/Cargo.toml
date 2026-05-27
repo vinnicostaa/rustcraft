@@ -1,0 +1,17 @@
+[package]
+name = "rustcraft"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+bevy.workspace = true
+rc-input.workspace = true
+rc-player.workspace = true
+rc-render.workspace = true
+rc-voxel.workspace = true
+rc-world.workspace = true
+
+[lints]
+workspace = true
