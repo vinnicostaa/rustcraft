@@ -1,0 +1,99 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug unit tests in library 'rc_input'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rc-input"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'rc_player'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rc-player"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'rc_render'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rc-render"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'rc_voxel'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rc-voxel"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'rc_world'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rc-world"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'rustcraft'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rustcraft"
+                ]
+            }
+        },
+        {
+            "name": "Debug executable 'rustcraft'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=rustcraft",
+                    "--package=rustcraft"
+                ]
+            },
+            "args": []
+        },
+        {
+            "name": "Debug unit tests in executable 'rustcraft'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bin=rustcraft",
+                    "--package=rustcraft"
+                ]
+            }
+        }
+    ]
+}

@@ -1,1 +1,4 @@
 /target
+
+# Local conversation/context dumps are session artifacts, not project source.
+context-*.md
