@@ -118,19 +118,20 @@ rustcraft
 
 ## Limitações conhecidas
 
-A implementação atual ainda usa uma entidade renderizável por bloco no spawn principal. Isso é simples para estudo, mas não escala.
+O spawn principal já usa uma entidade renderizável para o chunk inicial, gerada a partir de `Chunk` + mesh com faces expostas.
 
-O projeto já tem `Chunk` em memória, armazenamento compacto de blocos e geração de mesh por chunk com faces expostas. A próxima etapa técnica importante é substituir o spawn por bloco por:
+O projeto já tem `Chunk` em memória, armazenamento compacto de blocos, geração de mesh por chunk com faces expostas e spawn inicial por chunk. As próximas etapas técnicas importantes são:
 
-1. uma entidade renderizável por chunk;
+1. recuperar material/visual por tipo de bloco via atlas, vertex color ou abordagem equivalente;
 2. atualização parcial de chunks alterados;
 3. colliders por chunk, não por bloco individual;
 4. consulta de chunks vizinhos para remover faces internas entre chunks.
 
 ## Próximas fronteiras recomendadas
 
-1. Mudar `rc-world` para spawnar uma entidade por chunk mesh.
-2. Adicionar raycast/interação de bloco.
-3. Integrar Rapier com collider por chunk.
-4. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.
-5. Adicionar `menu`/debug overlay para render distance, wireframe/diagnósticos e posição do player.
+1. Adicionar diagnosticos de chunk/render para medir entidades, faces e FPS.
+2. Recuperar material por tipo de bloco sem voltar ao spawn por bloco.
+3. Adicionar raycast/interação de bloco.
+4. Integrar Rapier com collider por chunk.
+5. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.
+6. Adicionar `menu`/debug overlay para render distance, wireframe/diagnósticos e posição do player.

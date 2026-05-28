@@ -52,6 +52,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       ├── lib.rs
     │       ├── lighting.rs
     │       ├── materials.rs
+    │       ├── meshing.rs
     │       └── plugin.rs
     └── rc-world/           # geração/spawn inicial do mundo
         └── src/
@@ -104,9 +105,9 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 ## Estado atual
 
-O protótipo já gera o mundo inicial como dados de `Chunk` e já possui uma etapa de meshing capaz de transformar esse chunk em um `Mesh` Bevy com apenas faces expostas. O spawn principal, porém, ainda renderiza os blocos desse chunk como entidades individuais. Isso preserva o comportamento visual atual enquanto a arquitetura muda por etapas.
+O protótipo já gera o mundo inicial como dados de `Chunk`, transforma esse chunk em um `Mesh` Bevy com apenas faces expostas e spawna uma entidade renderizável para o chunk inicial.
 
-Esse caminho ainda não é a estratégia final de performance: uma entidade por bloco mantém custo alto de ECS/renderização e pode explicar consumo de CPU perceptível mesmo em um mundo pequeno. A próxima etapa técnica é usar a mesh gerada por chunk no spawn do mundo.
+Esse caminho remove o custo estrutural de uma entidade renderizável por bloco comum de terreno. A renderização ainda é temporária visualmente: o chunk usa um material único até existir atlas de textura, vertex color ou outro mecanismo de material por face/bloco.
 
 Implementado:
 
@@ -122,12 +123,12 @@ Implementado:
 - geração determinística com `WorldSeed` e `TerrainGenerator`;
 - geração inicial de chunk em `rc-world::generate_chunk`;
 - geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
+- spawn inicial com uma entidade renderizável por chunk;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
-- o spawn principal ainda cria uma entidade renderizável por bloco não vazio;
-- a mesh por chunk já existe como API, mas ainda não substitui o spawn por bloco;
+- o chunk inicial ainda usa material único temporário;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
 

@@ -1,14 +1,19 @@
 use bevy::prelude::*;
-use rc_render::{BlockRenderAssets, RenderConfig};
+use rc_render::{BlockRenderAssets, RenderConfig, build_chunk_mesh};
 use rc_voxel::ChunkCoord;
 
 use crate::{
-    Block, GeneratedChunkBlock, WorldConfig,
+    GeneratedChunk, WorldConfig,
     generation::{TerrainGenerator, generate_chunk},
 };
 
+/// Spawna o chunk inicial como uma única entidade renderizável.
+///
+/// A geometria do chunk fica em `rc-render`; `rc-world` apenas gera os dados de
+/// mundo, registra a mesh no asset storage do Bevy e cria a entidade.
 pub(crate) fn spawn_initial_chunk(
     mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
     block_assets: Res<BlockRenderAssets>,
     render_config: Res<RenderConfig>,
     world_config: Res<WorldConfig>,
@@ -22,31 +27,17 @@ pub(crate) fn spawn_initial_chunk(
     let chunk = generate_chunk(chunk_coord, chunk_size, &generator);
     let origin = chunk_coord.origin_block_pos(chunk_size);
 
-    for x in 0..chunk.size() {
-        for y in 0..chunk.size() {
-            for z in 0..chunk.size() {
-                let Some(kind) = chunk.get(x, y, z) else {
-                    continue;
-                };
+    let chunk_mesh = build_chunk_mesh(&chunk, block_size);
+    let chunk_mesh = meshes.add(chunk_mesh);
 
-                if kind.is_air() {
-                    continue;
-                }
-
-                if let Some(material) = block_assets.material_for(kind) {
-                    commands.spawn((
-                        Block { kind },
-                        GeneratedChunkBlock,
-                        Mesh3d(block_assets.block_mesh()),
-                        MeshMaterial3d(material),
-                        Transform::from_xyz(
-                            (origin.x + x) as f32 * block_size,
-                            (origin.y + y) as f32 * block_size,
-                            (origin.z + z) as f32 * block_size,
-                        ),
-                    ));
-                }
-            }
-        }
-    }
+    commands.spawn((
+        GeneratedChunk { coord: chunk_coord },
+        Mesh3d(chunk_mesh),
+        MeshMaterial3d(block_assets.chunk_material()),
+        Transform::from_xyz(
+            origin.x as f32 * block_size,
+            origin.y as f32 * block_size,
+            origin.z as f32 * block_size,
+        ),
+    ));
 }

@@ -70,5 +70,5 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 
 - O mundo ja e gerado como `Chunk`.
 - `rc-render` ja tem `build_chunk_mesh_data` e `build_chunk_mesh`.
-- O spawn principal ainda usa uma entidade renderizavel por bloco.
-- A proxima task de codigo deve trocar o spawn para usar a mesh por chunk, mantendo a limitacao documentada de material unico ate atlas/vertex color.
+- O spawn principal usa uma entidade renderizavel para o chunk inicial.
+- A proxima frente tecnica deve medir chunk/render e recuperar material por bloco sem voltar ao spawn por bloco, mantendo a limitacao documentada de material unico ate atlas/vertex color.

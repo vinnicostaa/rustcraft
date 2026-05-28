@@ -3,7 +3,10 @@ use rc_voxel::{BlockState, DIRT, GRASS, STONE};
 
 use crate::{RenderConfig, materials::block_material};
 
-/// Shared handles for block rendering.
+/// Handles compartilhados para renderização voxel.
+///
+/// O recurso centraliza meshes e materiais criados no startup para que outros
+/// sistemas usem handles baratos em vez de recriar assets.
 #[derive(Resource, Clone)]
 pub struct BlockRenderAssets {
     block_mesh: Handle<Mesh>,
@@ -13,10 +16,12 @@ pub struct BlockRenderAssets {
 }
 
 impl BlockRenderAssets {
+    /// Mesh cúbica usada pelo caminho legado de renderização por bloco.
     pub fn block_mesh(&self) -> Handle<Mesh> {
         self.block_mesh.clone()
     }
 
+    /// Material associado a um estado de bloco conhecido.
     pub fn material_for(&self, block: BlockState) -> Option<Handle<StandardMaterial>> {
         match block.id {
             GRASS => Some(self.grass_material.clone()),
@@ -24,6 +29,15 @@ impl BlockRenderAssets {
             STONE => Some(self.stone_material.clone()),
             _ => None,
         }
+    }
+
+    /// Material temporário para a mesh agregada do chunk.
+    ///
+    /// Uma única mesh Bevy usa um material simples neste estágio. Atlas,
+    /// vertex color ou outro caminho de material por face entram depois sem
+    /// voltar ao spawn de uma entidade por bloco.
+    pub fn chunk_material(&self) -> Handle<StandardMaterial> {
+        self.grass_material.clone()
     }
 }
 
