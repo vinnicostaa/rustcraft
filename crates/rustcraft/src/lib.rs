@@ -4,5 +4,6 @@
 //! domínio vivem nas crates internas `rc-*`.
 
 pub mod app;
+mod diagnostics;
 
 pub use app::run;

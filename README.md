@@ -19,6 +19,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     ├── rustcraft/          # package/bin principal: compõe o app Bevy
     │   └── src/
     │       ├── app.rs
+    │       ├── diagnostics.rs
     │       ├── lib.rs
     │       └── bin/
     │           └── rustcraft.rs
@@ -58,6 +59,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
         └── src/
             ├── components.rs
             ├── config.rs
+            ├── diagnostics.rs
             ├── generation.rs
             ├── lib.rs
             ├── plugin.rs
@@ -124,11 +126,13 @@ Implementado:
 - geração inicial de chunk em `rc-world::generate_chunk`;
 - geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
 - spawn inicial com uma entidade renderizável por chunk;
+- diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
 - o chunk inicial ainda usa material único temporário;
+- diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
 

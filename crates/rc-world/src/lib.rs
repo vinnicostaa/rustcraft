@@ -1,5 +1,6 @@
 mod components;
 mod config;
+mod diagnostics;
 mod generation;
 mod plugin;
 mod spawn;

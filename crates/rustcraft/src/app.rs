@@ -1,3 +1,4 @@
+use crate::diagnostics::RustcraftDiagnosticsPlugin;
 use bevy::prelude::*;
 use rc_input::InputPlugin;
 use rc_player::PlayerPlugin;
@@ -12,7 +13,13 @@ pub struct RustcraftPlugin;
 
 impl Plugin for RustcraftPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((RenderPlugin, WorldPlugin, InputPlugin, PlayerPlugin));
+        app.add_plugins((
+            RustcraftDiagnosticsPlugin,
+            RenderPlugin,
+            WorldPlugin,
+            InputPlugin,
+            PlayerPlugin,
+        ));
     }
 }
 
