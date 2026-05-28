@@ -1,13 +1,31 @@
 use bevy::{
+    ecs::system::SystemParam,
     picking::prelude::{MeshRayCast, MeshRayCastSettings, RayCastVisibility},
     prelude::*,
+    window::{CursorGrabMode, CursorOptions},
 };
 use rc_player::Player;
 use rc_render::RenderConfig;
-use rc_voxel::block_pos_from_hit;
-use rc_world::GeneratedChunk;
+use rc_voxel::{BlockState, block_pos_from_hit};
+use rc_world::{ChunkMap, GeneratedChunk, WorldConfig};
 
 const PLAYER_REACH: f32 = 8.0;
+
+/// Parâmetros de sistema agrupados para o raycast de interação.
+///
+/// `#[derive(SystemParam)]` permite agrupar múltiplos parâmetros Bevy em uma
+/// struct, reduzindo a contagem de argumentos da função de sistema e nomeando
+/// o conjunto de forma legível.
+#[derive(SystemParam)]
+struct InteractionParams<'w, 's> {
+    player_query: Query<'w, 's, &'static GlobalTransform, With<Player>>,
+    chunk_query: Query<'w, 's, (), With<GeneratedChunk>>,
+    cursor_query: Query<'w, 's, &'static CursorOptions>,
+    render_config: Res<'w, RenderConfig>,
+    world_config: Res<'w, WorldConfig>,
+    mouse: Res<'w, ButtonInput<MouseButton>>,
+    chunk_map: ResMut<'w, ChunkMap>,
+}
 
 /// Sistemas de interação entre o player e o mundo.
 pub struct RustcraftInteractionPlugin;
@@ -22,20 +40,21 @@ impl Plugin for RustcraftInteractionPlugin {
 }
 
 fn draw_player_chunk_raycast(
-    player_query: Query<&GlobalTransform, With<Player>>,
-    chunk_query: Query<(), With<GeneratedChunk>>,
-    render_config: Res<RenderConfig>,
+    mut params: InteractionParams,
     mut ray_cast: MeshRayCast,
     mut gizmos: Gizmos,
 ) {
-    let Ok(player_transform) = player_query.single() else {
-        return;
+    let player_transform = {
+        let Ok(player_transform) = params.player_query.single() else {
+            return;
+        };
+
+        player_transform.compute_transform()
     };
 
-    let player_transform = player_transform.compute_transform();
     let ray = Ray3d::new(player_transform.translation, player_transform.forward());
 
-    let filter = |entity| chunk_query.contains(entity);
+    let filter = |entity| params.chunk_query.contains(entity);
     let settings = MeshRayCastSettings::default()
         .with_filter(&filter)
         .with_visibility(RayCastVisibility::Visible);
@@ -56,22 +75,34 @@ fn draw_player_chunk_raycast(
     let Some(block_pos) = block_pos_from_hit(
         hit.point.to_array(),
         normal.to_array(),
-        render_config.block_size,
+        params.render_config.block_size,
     ) else {
         return;
     };
 
+    // --- Interação de quebrar bloco ---
+    let cursor_captured = params
+        .cursor_query
+        .iter()
+        .any(|c| c.grab_mode == CursorGrabMode::Locked);
+
+    if cursor_captured && params.mouse.just_pressed(MouseButton::Left) {
+        params
+            .chunk_map
+            .set_block(block_pos, BlockState::air(), params.world_config.chunk_size);
+    }
+
     // Highlight visual temporário: por enquanto isso é ferramenta de debug, não
     // estado de gameplay persistente.
     let block_center = Vec3::new(
-        (block_pos.x as f32 + 0.5) * render_config.block_size,
-        (block_pos.y as f32 + 0.5) * render_config.block_size,
-        (block_pos.z as f32 + 0.5) * render_config.block_size,
+        (block_pos.x as f32 + 0.5) * params.render_config.block_size,
+        (block_pos.y as f32 + 0.5) * params.render_config.block_size,
+        (block_pos.z as f32 + 0.5) * params.render_config.block_size,
     );
 
     gizmos.cube(
         Transform::from_translation(block_center)
-            .with_scale(Vec3::splat(render_config.block_size * 1.02)),
+            .with_scale(Vec3::splat(params.render_config.block_size * 1.02)),
         Color::srgb(0.0, 1.0, 1.0),
     );
 }
