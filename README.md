@@ -21,16 +21,44 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       └── bin/
     │           └── rustcraft.rs
     ├── rc-input/           # input físico -> ações semânticas
-    │   └── src/lib.rs
+    │   └── src/
+    │       ├── actions.rs
+    │       ├── bindings.rs
+    │       ├── lib.rs
+    │       ├── plugin.rs
+    │       └── state.rs
     ├── rc-player/          # player/câmera/controlador
-    │   └── src/lib.rs
+    │   └── src/
+    │       ├── camera.rs
+    │       ├── components.rs
+    │       ├── config.rs
+    │       ├── lib.rs
+    │       ├── movement.rs
+    │       └── plugin.rs
     ├── rc-voxel/           # dados voxel puros
-    │   └── src/lib.rs
+    │   └── src/
+    │       ├── block.rs
+    │       ├── chunk.rs
+    │       ├── generation.rs
+    │       ├── lib.rs
+    │       ├── position.rs
+    │       └── registry.rs
     ├── rc-render/          # luz, mesh/material e assets visuais
-    │   └── src/lib.rs
+    │   └── src/
+    │       ├── assets.rs
+    │       ├── config.rs
+    │       ├── lib.rs
+    │       ├── lighting.rs
+    │       ├── materials.rs
+    │       └── plugin.rs
     └── rc-world/           # geração/spawn inicial do mundo
         └── src/
-            └── lib.rs
+            ├── components.rs
+            ├── config.rs
+            ├── generation.rs
+            ├── lib.rs
+            ├── plugin.rs
+            └── spawn.rs
 ```
 
 ## Arquitetura atual
@@ -46,8 +74,9 @@ rc-input: ActionState com intenções de jogo
         ↓
 rc-player: movimenta a câmera/player
 
-rc-voxel ─→ rc-render ─→ rc-world
-  dados       assets        geração inicial de blocos
+rc-voxel ─→ rc-world ─→ rc-render
+  dados       geração       assets/visual
+  voxel       de chunk      Bevy
 ```
 
 Essa separação segue a direção discutida na pesquisa de arquitetura:
@@ -73,19 +102,30 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 ## Estado atual
 
-O protótipo ainda renderiza blocos como entidades individuais. Isso é intencional por enquanto para manter a base didática, mas não é a estratégia final de performance.
+O protótipo já gera o mundo inicial como dados de `Chunk`, mas ainda renderiza os blocos desse chunk como entidades individuais. Isso preserva o comportamento visual atual enquanto a arquitetura muda por etapas.
+
+Esse caminho ainda não é a estratégia final de performance: uma entidade por bloco mantém custo alto de ECS/renderização e pode explicar consumo de CPU perceptível mesmo em um mundo pequeno. A próxima etapa técnica é gerar uma mesh por chunk contendo apenas faces expostas.
 
 Implementado:
 
 - workspace Cargo;
 - package principal em `crates/rustcraft`;
 - library crates internas `rc-input`, `rc-player`, `rc-voxel`, `rc-render` e `rc-world`;
+- crates internas organizadas por módulos de domínio, com `lib.rs` como API pública;
 - plugin raiz do jogo compondo plugins das crates internas;
 - camada de input semântico separada de teclado físico;
 - câmera/player com movimento WASD + Space/Shift;
-- geração simples de terreno;
-- tipos lógicos de bloco em crate voxel pura;
+- modelo de blocos baseado em `BlockId`, `BlockState`, `BlockDefinition` e registry mínimo;
+- `Chunk` puro em `rc-voxel`, armazenando `BlockState` sem depender de Bevy;
+- geração determinística com `WorldSeed` e `TerrainGenerator`;
+- geração inicial de chunk em `rc-world::generate_chunk`;
 - assets compartilhados para mesh/material de blocos em crate render.
+
+Limitações atuais:
+
+- o spawn principal ainda cria uma entidade renderizável por bloco não vazio;
+- ainda não há mesh por chunk, greedy meshing, atlas de textura ou culling próprio por chunk;
+- a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
 
 ## Roadmap inicial
 
