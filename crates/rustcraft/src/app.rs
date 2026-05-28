@@ -1,4 +1,4 @@
-use crate::diagnostics::RustcraftDiagnosticsPlugin;
+use crate::{diagnostics::RustcraftDiagnosticsPlugin, interaction::RustcraftInteractionPlugin};
 use bevy::prelude::*;
 use rc_input::InputPlugin;
 use rc_player::PlayerPlugin;
@@ -19,6 +19,7 @@ impl Plugin for RustcraftPlugin {
             WorldPlugin,
             InputPlugin,
             PlayerPlugin,
+            RustcraftInteractionPlugin,
         ));
     }
 }

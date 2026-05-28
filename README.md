@@ -20,6 +20,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │   └── src/
     │       ├── app.rs
     │       ├── diagnostics.rs
+    │       ├── interaction.rs
     │       ├── lib.rs
     │       └── bin/
     │           └── rustcraft.rs
@@ -127,11 +128,13 @@ Implementado:
 - geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
 - spawn inicial com uma entidade renderizável por chunk;
 - diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
+- raycast de interação a partir da câmera/player, com conversão para `BlockPos` e highlight debug do bloco mirado;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
 - o chunk inicial ainda usa material único temporário;
+- a interação com bloco ainda é apenas highlight visual de debug; quebrar/colocar bloco entra depois;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.

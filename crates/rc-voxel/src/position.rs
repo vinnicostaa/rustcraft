@@ -53,9 +53,54 @@ impl ChunkCoord {
     }
 }
 
+const BLOCK_HIT_EPSILON: f32 = 0.001;
+
+/// Converte um hit de raycast em uma posição inteira de bloco.
+///
+/// O ponto do hit costuma ficar exatamente na face do bloco. Para descobrir o
+/// bloco atingido, a função desloca o ponto levemente para dentro da face usando
+/// a normal e só então converte coordenadas de mundo para coordenadas voxel.
+pub fn block_pos_from_hit(point: [f32; 3], normal: [f32; 3], block_size: f32) -> Option<BlockPos> {
+    if !block_size.is_finite() || block_size <= 0.0 {
+        return None;
+    }
+
+    if !point.iter().all(|value| value.is_finite()) {
+        return None;
+    }
+
+    if !normal.iter().all(|value| value.is_finite()) {
+        return None;
+    }
+
+    let normal_length =
+        (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
+
+    if normal_length <= f32::EPSILON {
+        return None;
+    }
+
+    let nudge = block_size * BLOCK_HIT_EPSILON;
+    let inside_point = [
+        point[0] - normal[0] / normal_length * nudge,
+        point[1] - normal[1] / normal_length * nudge,
+        point[2] - normal[2] / normal_length * nudge,
+    ];
+
+    Some(BlockPos::new(
+        world_coord_to_block(inside_point[0], block_size),
+        world_coord_to_block(inside_point[1], block_size),
+        world_coord_to_block(inside_point[2], block_size),
+    ))
+}
+
+fn world_coord_to_block(coord: f32, block_size: f32) -> i32 {
+    (coord / block_size).floor() as i32
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{BlockPos, ChunkCoord};
+    use super::{BlockPos, ChunkCoord, block_pos_from_hit};
 
     #[test]
     fn block_pos_new_stores_coordinates() {
@@ -79,5 +124,33 @@ mod tests {
         let coord = ChunkCoord::new(2, 0, -1);
 
         assert_eq!(coord.origin_block_pos(16), BlockPos::new(32, 0, -16));
+    }
+
+    #[test]
+    fn block_pos_from_hit_uses_inside_hit_face() {
+        let pos = block_pos_from_hit([2.4, 3.0, 1.2], [0.0, 1.0, 0.0], 1.0);
+
+        assert_eq!(pos, Some(BlockPos::new(2, 2, 1)));
+    }
+
+    #[test]
+    fn block_pos_from_hit_handles_positive_x_face() {
+        let pos = block_pos_from_hit([4.0, 1.2, 0.5], [1.0, 0.0, 0.0], 1.0);
+
+        assert_eq!(pos, Some(BlockPos::new(3, 1, 0)));
+    }
+
+    #[test]
+    fn block_pos_from_hit_handles_negative_coordinates() {
+        let pos = block_pos_from_hit([-1.0, 2.2, 0.3], [-1.0, 0.0, 0.0], 1.0);
+
+        assert_eq!(pos, Some(BlockPos::new(-1, 2, 0)));
+    }
+
+    #[test]
+    fn block_pos_from_hit_rejects_invalid_block_size() {
+        let pos = block_pos_from_hit([1.0, 1.0, 1.0], [0.0, 1.0, 0.0], 0.0);
+
+        assert_eq!(pos, None);
     }
 }
