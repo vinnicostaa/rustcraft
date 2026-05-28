@@ -108,7 +108,7 @@ rustcraft
 
 ### Bloco lógico é separado de render
 
-`rc-voxel` define `BlockType`; `rc-render` decide qual material representa cada tipo. Isso prepara o caminho para:
+`rc-voxel` define `BlockId`, `BlockState` e metadados de bloco; `rc-render` decide como transformar esses dados em material e mesh. Isso prepara o caminho para:
 
 - textura/atlas;
 - meshing por chunk;
@@ -118,22 +118,19 @@ rustcraft
 
 ## Limitações conhecidas
 
-A implementação atual ainda usa uma entidade renderizável por bloco. Isso é simples para estudo, mas não escala.
+A implementação atual ainda usa uma entidade renderizável por bloco no spawn principal. Isso é simples para estudo, mas não escala.
 
-A próxima etapa técnica importante é substituir isso por:
+O projeto já tem `Chunk` em memória, armazenamento compacto de blocos e geração de mesh por chunk com faces expostas. A próxima etapa técnica importante é substituir o spawn por bloco por:
 
-1. estrutura de chunk em memória;
-2. armazenamento compacto de blocos;
-3. geração de mesh por chunk;
-4. emissão apenas de faces expostas;
-5. atualização parcial de chunks alterados;
-6. colliders por chunk, não por bloco individual.
+1. uma entidade renderizável por chunk;
+2. atualização parcial de chunks alterados;
+3. colliders por chunk, não por bloco individual;
+4. consulta de chunks vizinhos para remover faces internas entre chunks.
 
 ## Próximas fronteiras recomendadas
 
-1. Criar `Chunk`, `ChunkCoord` e armazenamento de blocos sem depender de entidades Bevy por bloco.
-2. Criar um `chunk_meshing` separado para gerar `Mesh` a partir dos dados de chunk.
-3. Mudar `rc-world` para spawnar uma entidade por chunk mesh.
-4. Adicionar raycast/interação de bloco.
-5. Integrar Rapier com collider por chunk.
-6. Adicionar `menu`/debug overlay para render distance, wireframe/diagnósticos e posição do player.
+1. Mudar `rc-world` para spawnar uma entidade por chunk mesh.
+2. Adicionar raycast/interação de bloco.
+3. Integrar Rapier com collider por chunk.
+4. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.
+5. Adicionar `menu`/debug overlay para render distance, wireframe/diagnósticos e posição do player.

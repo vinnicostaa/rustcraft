@@ -12,6 +12,8 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
 .
 ├── Cargo.toml              # workspace root: membros, deps, lints e profiles
 ├── Cargo.lock              # lockfile compartilhado
+├── AGENTS.md               # guia para agentes e tutores em novas sessões
+├── CODING_PRACTICES.md     # práticas de codificação e documentação
 ├── ARCHITECTURE.md         # notas de arquitetura e responsabilidades
 └── crates/
     ├── rustcraft/          # package/bin principal: compõe o app Bevy
@@ -86,7 +88,7 @@ Essa separação segue a direção discutida na pesquisa de arquitetura:
 - **Bevy:** composição por plugins, resources, components e schedules explícitos.
 - **Voxel/Rapier futuro:** mundo e player já estão separados para introduzir chunks, colisão e character controller depois.
 
-Mais detalhes em [`ARCHITECTURE.md`](ARCHITECTURE.md).
+Mais detalhes em [`ARCHITECTURE.md`](ARCHITECTURE.md), [`CODING_PRACTICES.md`](CODING_PRACTICES.md) e [`AGENTS.md`](AGENTS.md).
 
 ## Comandos
 
@@ -102,9 +104,9 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 ## Estado atual
 
-O protótipo já gera o mundo inicial como dados de `Chunk`, mas ainda renderiza os blocos desse chunk como entidades individuais. Isso preserva o comportamento visual atual enquanto a arquitetura muda por etapas.
+O protótipo já gera o mundo inicial como dados de `Chunk` e já possui uma etapa de meshing capaz de transformar esse chunk em um `Mesh` Bevy com apenas faces expostas. O spawn principal, porém, ainda renderiza os blocos desse chunk como entidades individuais. Isso preserva o comportamento visual atual enquanto a arquitetura muda por etapas.
 
-Esse caminho ainda não é a estratégia final de performance: uma entidade por bloco mantém custo alto de ECS/renderização e pode explicar consumo de CPU perceptível mesmo em um mundo pequeno. A próxima etapa técnica é gerar uma mesh por chunk contendo apenas faces expostas.
+Esse caminho ainda não é a estratégia final de performance: uma entidade por bloco mantém custo alto de ECS/renderização e pode explicar consumo de CPU perceptível mesmo em um mundo pequeno. A próxima etapa técnica é usar a mesh gerada por chunk no spawn do mundo.
 
 Implementado:
 
@@ -119,12 +121,14 @@ Implementado:
 - `Chunk` puro em `rc-voxel`, armazenando `BlockState` sem depender de Bevy;
 - geração determinística com `WorldSeed` e `TerrainGenerator`;
 - geração inicial de chunk em `rc-world::generate_chunk`;
+- geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
 - o spawn principal ainda cria uma entidade renderizável por bloco não vazio;
-- ainda não há mesh por chunk, greedy meshing, atlas de textura ou culling próprio por chunk;
+- a mesh por chunk já existe como API, mas ainda não substitui o spawn por bloco;
+- ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
 
 ## Roadmap inicial
