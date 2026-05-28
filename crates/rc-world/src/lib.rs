@@ -4,6 +4,7 @@ mod config;
 mod diagnostics;
 mod generation;
 mod plugin;
+mod remesh;
 mod spawn;
 
 pub use chunk_map::{ChunkEntry, ChunkMap};

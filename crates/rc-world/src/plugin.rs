@@ -1,5 +1,6 @@
 use crate::{
-    ChunkMap, WorldConfig, diagnostics::register_world_diagnostics, spawn::spawn_initial_chunk,
+    ChunkMap, WorldConfig, diagnostics::register_world_diagnostics, remesh::rebuild_dirty_chunks,
+    spawn::spawn_initial_chunk,
 };
 use bevy::prelude::*;
 use rc_render::RenderStartupSet;
@@ -16,6 +17,7 @@ impl Plugin for WorldPlugin {
             .add_systems(
                 Startup,
                 spawn_initial_chunk.after(RenderStartupSet::PrepareAssets),
-            );
+            )
+            .add_systems(PostUpdate, rebuild_dirty_chunks);
     }
 }
