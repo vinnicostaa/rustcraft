@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 use rc_render::{BlockRenderAssets, RenderConfig};
-use rc_voxel::block_for_layer;
+use rc_voxel::ChunkCoord;
 
-use crate::{Block, GeneratedChunkBlock, WorldConfig, generation::terrain_height};
+use crate::{
+    Block, GeneratedChunkBlock, WorldConfig,
+    generation::{TerrainGenerator, generate_chunk},
+};
 
 pub(crate) fn spawn_initial_chunk(
     mut commands: Commands,
@@ -14,12 +17,21 @@ pub(crate) fn spawn_initial_chunk(
     let max_height = world_config.max_height;
     let block_size = render_config.block_size;
 
-    for x in 0..chunk_size {
-        for z in 0..chunk_size {
-            let surface_y = terrain_height(x, z, max_height);
+    let generator = TerrainGenerator::new(world_config.seed, max_height);
+    let chunk_coord = ChunkCoord::new(0, 0, 0);
+    let chunk = generate_chunk(chunk_coord, chunk_size, &generator);
+    let origin = chunk_coord.origin_block_pos(chunk_size);
 
-            for y in 0..=surface_y {
-                let kind = block_for_layer(y, surface_y);
+    for x in 0..chunk.size() {
+        for y in 0..chunk.size() {
+            for z in 0..chunk.size() {
+                let Some(kind) = chunk.get(x, y, z) else {
+                    continue;
+                };
+
+                if kind.is_air() {
+                    continue;
+                }
 
                 if let Some(material) = block_assets.material_for(kind) {
                     commands.spawn((
@@ -28,9 +40,9 @@ pub(crate) fn spawn_initial_chunk(
                         Mesh3d(block_assets.block_mesh()),
                         MeshMaterial3d(material),
                         Transform::from_xyz(
-                            x as f32 * block_size,
-                            y as f32 * block_size,
-                            z as f32 * block_size,
+                            (origin.x + x) as f32 * block_size,
+                            (origin.y + y) as f32 * block_size,
+                            (origin.z + z) as f32 * block_size,
                         ),
                     ));
                 }

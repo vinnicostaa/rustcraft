@@ -138,4 +138,15 @@ mod tests {
 
         assert_ne!(a.height_at(10, 20), b.height_at(10, 20));
     }
+
+    #[test]
+    fn zero_seed_generator_matches_terrain_height() {
+        let generator = TerrainGenerator::new(WorldSeed(0), 6);
+
+        for x in -16..16 {
+            for z in -16..16 {
+                assert_eq!(generator.height_at(x, z), terrain_height(x, z, 6));
+            }
+        }
+    }
 }

@@ -15,7 +15,7 @@ pub struct WorldConfig {
 impl Default for WorldConfig {
     fn default() -> Self {
         Self {
-            seed: WorldSeed(42),
+            seed: WorldSeed(0),
             chunk_size: 24,
             max_height: 6,
         }
