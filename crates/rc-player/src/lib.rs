@@ -1,6 +1,8 @@
 mod camera;
 mod components;
 mod config;
+mod cursor;
+mod look;
 mod movement;
 mod plugin;
 

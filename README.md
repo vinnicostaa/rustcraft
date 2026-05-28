@@ -36,7 +36,9 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       ├── camera.rs
     │       ├── components.rs
     │       ├── config.rs
+    │       ├── cursor.rs
     │       ├── lib.rs
+    │       ├── look.rs
     │       ├── movement.rs
     │       └── plugin.rs
     ├── rc-voxel/           # dados voxel puros
@@ -78,7 +80,7 @@ rc-input: mapeia KeyCode para PlayerAction
         ↓
 rc-input: ActionState com intenções de jogo
         ↓
-rc-player: movimenta a câmera/player
+rc-player: gira e movimenta a câmera/player
 
 rc-voxel ─→ rc-world ─→ rc-render
   dados       geração       assets/visual
@@ -120,7 +122,7 @@ Implementado:
 - crates internas organizadas por módulos de domínio, com `lib.rs` como API pública;
 - plugin raiz do jogo compondo plugins das crates internas;
 - camada de input semântico separada de teclado físico;
-- câmera/player com movimento WASD + Space/Shift;
+- câmera/player com mouse look, captura de cursor e movimento WASD + Space/Shift relativo à direção atual;
 - modelo de blocos baseado em `BlockId`, `BlockState`, `BlockDefinition` e registry mínimo;
 - `Chunk` puro em `rc-voxel`, armazenando `BlockState` sem depender de Bevy;
 - geração determinística com `WorldSeed` e `TerrainGenerator`;
@@ -135,6 +137,7 @@ Limitações atuais:
 
 - o chunk inicial ainda usa material único temporário;
 - a interação com bloco ainda é apenas highlight visual de debug; quebrar/colocar bloco entra depois;
+- a captura de cursor ainda não é controlada por `GameState`; por enquanto, clique esquerdo captura e `Esc` libera;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
