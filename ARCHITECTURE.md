@@ -26,22 +26,29 @@ graph TD
     C --> D[rc-player look_player / move_player]
     D --> E[Transform do Player/Camera]
 
+    M[rustcraft GameState] --> N[CursorOptions]
+    M --> O[PlayerControlState]
+    O --> D
+    M --> P[rustcraft interaction/raycast]
+
     J[rc-voxel BlockId / BlockState / Chunk] --> H[rc-world generate_chunk]
-    H --> I[rc-render build_chunk_mesh]
+    H --> Q[rc-world ChunkMap]
+    Q --> I[rc-render build_chunk_mesh]
     I --> K[GeneratedChunk + Mesh3d]
     K --> L[Bevy renderer]
+    P --> Q
 ```
 
 ## Packages do workspace
 
 | Package | Responsabilidade atual | Não deve assumir |
 | --- | --- | --- |
-| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin` e composição dos plugins internos. | Regras de gameplay, dados voxel, render assets ou input físico. |
+| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin`, `GameState`, pausa/cursor e composição dos plugins internos. | Dados voxel, render assets ou input físico. |
 | `rc-input` | `PlayerAction`, `ActionState`, bindings teclado → ação e `InputPlugin`. | Mover player, gerar mundo ou conhecer render. |
-| `rc-player` | `Player`, `PlayerConfig`, spawn da câmera/player, captura de cursor, mouse look e movimento por ações. | Ler `KeyCode` diretamente, gerar terreno ou criar materiais. |
+| `rc-player` | `Player`, `PlayerConfig`, `PlayerControlState`, spawn da câmera/player, mouse look e movimento por ações. | Ler `KeyCode` diretamente, conhecer `GameState`, gerar terreno ou criar materiais. |
 | `rc-voxel` | Dados voxel puros: `BlockId`, `BlockState`, definições/registry, posições e `Chunk`. | Depender de Bevy, meshes, materials, input ou player. |
 | `rc-render` | `RenderConfig`, iluminação, materiais, assets visuais e conversão de `Chunk` em mesh Bevy. | Gerar terreno, possuir estado de mundo ou mapear controles. |
-| `rc-world` | `WorldConfig`, seed, geração de chunk, spawn da entidade renderizável do chunk e diagnósticos de mundo. | Mapear teclas, mover player ou decidir detalhes visuais internos do render. |
+| `rc-world` | `WorldConfig`, seed, geração de chunk, `ChunkMap`, spawn da entidade renderizável, dirty/remesh e diagnósticos de mundo. | Mapear teclas, mover player ou decidir detalhes visuais internos do render. |
 
 ## Ordem dos sistemas
 
@@ -59,10 +66,14 @@ Em runtime:
 ```text
 PreUpdate / rc-input::InputSet::CollectInput
     ↓
+Update / rustcraft::toggle_pause
+    ↓
 Update / rc-player::look_player -> rc-player::move_player
+    ↓
+PostUpdate / rustcraft::interaction -> rc-world::rebuild_dirty_chunks
 ```
 
-O input é coletado em `PreUpdate`; o mouse look aplica a rotação em `Update` e o movimento usa a rotação atual do player logo depois.
+O input é coletado em `PreUpdate`; `GameState` alterna `InGame`/`Paused`; `PlayerControlState` habilita ou desabilita `look_player`/`move_player`; e a interação com bloco só roda enquanto o jogo está em `InGame`.
 
 ## Decisões atuais
 
@@ -106,6 +117,12 @@ rustcraft
 - input de rede no futuro;
 - testes de gameplay sem simular teclado.
 
+### Estado de jogo e controle do player são separados
+
+`rustcraft::GameState` representa o modo do app, como `InGame` e `Paused`. Ele controla captura/liberação do cursor e quais sistemas de app podem rodar.
+
+`rc-player::PlayerControlState` representa apenas se o controlador do player está aceitando look/movimento. Essa separação evita acoplar `rc-player` ao app principal e deixa espaço para casos futuros como inventário, cutscene, morte, debug camera ou menu sem tratar todos como o mesmo estado de jogo.
+
 ### Camera livre manual é intencional por enquanto
 
 Bevy `0.18.1` oferece `FreeCamera`/`FreeCameraPlugin` pela feature opcional `free_camera`. O projeto mantém `rc-player` manual neste momento porque o objetivo didático é aprender input, sistemas e `Transform`, além de preservar a separação `rc-input` → `ActionState` → `rc-player`.
@@ -126,18 +143,18 @@ Essa decisão pode ser reavaliada se a câmera virar apenas ferramenta de debug.
 
 O spawn principal já usa uma entidade renderizável para o chunk inicial, gerada a partir de `Chunk` + mesh com faces expostas.
 
-O projeto já tem `Chunk` em memória, armazenamento compacto de blocos, geração de mesh por chunk com faces expostas e spawn inicial por chunk. As próximas etapas técnicas importantes são:
+O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, spawn inicial por chunk, quebra de bloco por raycast e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
 
 1. recuperar material/visual por tipo de bloco via atlas, vertex color ou abordagem equivalente;
-2. atualização parcial de chunks alterados;
+2. colocar bloco usando a mesma base de `ChunkMap` + dirty/remesh;
 3. colliders por chunk, não por bloco individual;
 4. consulta de chunks vizinhos para remover faces internas entre chunks.
 
 ## Próximas fronteiras recomendadas
 
 1. Recuperar material por tipo de bloco sem voltar ao spawn por bloco.
-2. Separar captura de cursor por `GameState` quando menu/pausa existirem.
-3. Evoluir a interação de bloco de highlight debug para quebrar/colocar bloco.
+2. Criar UI mínima de pausa/menu sem misturar estado do app com estado do player.
+3. Evoluir a interação de bloco para colocar bloco e estado persistente de bloco mirado.
 4. Medir tempo de meshing quando chunk map/streaming existir.
 5. Integrar Rapier com collider por chunk.
 6. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.

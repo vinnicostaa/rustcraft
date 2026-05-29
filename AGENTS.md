@@ -29,6 +29,7 @@ Antes de propor ou alterar codigo, leia:
 - Use documentacao oficial e implementacoes locais instaladas antes de tratar algo como verdade tecnica.
 - Para Bevy, o projeto usa `bevy = 0.18.1`; confira exemplos oficiais locais em `.cargo/registry` ou docs oficiais equivalentes.
 - Se uma API puder ter mudado, confirme antes de orientar a task.
+- Antes de propor padrao de implementacao para APIs de dependencias, verifique como o provedor da dependencia faz nos exemplos oficiais, docs ou codigo-fonte instalado. Prefira o padrao do provedor quando ele for compativel com a arquitetura do projeto.
 - Registre no vault decisoes ou mudancas estruturais relevantes.
 
 ## Fluxo de trabalho
@@ -71,4 +72,6 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 - O mundo ja e gerado como `Chunk`.
 - `rc-render` ja tem `build_chunk_mesh_data` e `build_chunk_mesh`.
 - O spawn principal usa uma entidade renderizavel para o chunk inicial.
-- A proxima frente tecnica deve medir chunk/render e recuperar material por bloco sem voltar ao spawn por bloco, mantendo a limitacao documentada de material unico ate atlas/vertex color.
+- `GameState` controla pausa/cursor no app principal, enquanto `PlayerControlState` controla look/movimento em `rc-player`.
+- `ChunkMap` registra chunks carregados, entidade renderizavel e flag dirty; quebrar bloco altera dado de chunk e reconstrói a mesh.
+- As proximas frentes tecnicas provaveis sao colocar bloco/inventario minimo, UI de pause/menu e recuperar material por bloco sem voltar ao spawn por bloco.

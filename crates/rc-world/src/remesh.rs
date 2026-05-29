@@ -6,8 +6,7 @@ use crate::ChunkMap;
 /// Reconstrói a mesh de cada chunk marcado como dirty no frame.
 ///
 /// Coleta os coords dirty primeiro para evitar conflito de borrow mutável +
-/// imutável no mesmo iterador. A flag dirty é limpa imediatamente para evitar
-/// rebuild duplo se nada mais mudar.
+/// imutável no mesmo iterador. A flag dirty é limpa depois da mesh ser atualizada.
 pub(crate) fn rebuild_dirty_chunks(
     mut chunk_map: ResMut<ChunkMap>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -20,7 +19,6 @@ pub(crate) fn rebuild_dirty_chunks(
         let Some(entry) = chunk_map.get_mut(coord) else {
             continue;
         };
-        entry.dirty = false;
 
         let new_mesh = build_chunk_mesh(&entry.data, render_config.block_size);
         let entity = entry.entity;
@@ -34,5 +32,6 @@ pub(crate) fn rebuild_dirty_chunks(
         };
 
         *mesh_asset = new_mesh;
+        entry.dirty = false;
     }
 }

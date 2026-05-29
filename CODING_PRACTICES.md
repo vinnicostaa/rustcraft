@@ -10,6 +10,14 @@ Este documento registra o padrao de desenvolvimento do `rustcraft`.
 - Nao altere comportamento de jogo em refactors estruturais, salvo quando a task pedir isso explicitamente.
 - Quando uma limitacao tecnica for aceita temporariamente, documente a limitacao e a proxima etapa.
 
+## Dependencias e APIs externas
+
+- Antes de implementar ou recomendar um padrao para uma dependencia, verifique como o proprio provedor resolve o mesmo tipo de problema.
+- Para Bevy, consulte primeiro os exemplos oficiais locais em `.cargo/registry/src/.../bevy-<versao>/examples` e, quando necessario, o codigo-fonte dos crates `bevy_*` instalados.
+- Prefira APIs e idioms usados pelo provedor da dependencia quando eles forem compativeis com as fronteiras do projeto.
+- Se a solucao do provedor conflitar com uma decisao local, registre o motivo no README, ARCHITECTURE ou vault.
+- Nao trate memoria de API como fonte suficiente quando a informacao puder ser confirmada localmente.
+
 ## Organizacao Rust
 
 - `lib.rs` deve expor a API publica do crate e delegar implementacao para modulos internos.

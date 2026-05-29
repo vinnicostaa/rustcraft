@@ -1,8 +1,8 @@
+use crate::state::GameState;
 use bevy::{
     ecs::system::SystemParam,
     picking::prelude::{MeshRayCast, MeshRayCastSettings, RayCastVisibility},
     prelude::*,
-    window::{CursorGrabMode, CursorOptions},
 };
 use rc_player::Player;
 use rc_render::RenderConfig;
@@ -20,7 +20,6 @@ const PLAYER_REACH: f32 = 8.0;
 struct InteractionParams<'w, 's> {
     player_query: Query<'w, 's, &'static GlobalTransform, With<Player>>,
     chunk_query: Query<'w, 's, (), With<GeneratedChunk>>,
-    cursor_query: Query<'w, 's, &'static CursorOptions>,
     render_config: Res<'w, RenderConfig>,
     world_config: Res<'w, WorldConfig>,
     mouse: Res<'w, ButtonInput<MouseButton>>,
@@ -34,7 +33,9 @@ impl Plugin for RustcraftInteractionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             PostUpdate,
-            draw_player_chunk_raycast.after(TransformSystems::Propagate),
+            draw_player_chunk_raycast
+                .after(TransformSystems::Propagate)
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }
@@ -81,12 +82,7 @@ fn draw_player_chunk_raycast(
     };
 
     // --- Interação de quebrar bloco ---
-    let cursor_captured = params
-        .cursor_query
-        .iter()
-        .any(|c| c.grab_mode == CursorGrabMode::Locked);
-
-    if cursor_captured && params.mouse.just_pressed(MouseButton::Left) {
+    if params.mouse.just_pressed(MouseButton::Left) {
         params
             .chunk_map
             .set_block(block_pos, BlockState::air(), params.world_config.chunk_size);

@@ -22,6 +22,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       ├── diagnostics.rs
     │       ├── interaction.rs
     │       ├── lib.rs
+    │       ├── state.rs
     │       └── bin/
     │           └── rustcraft.rs
     ├── rc-input/           # input físico -> ações semânticas
@@ -36,7 +37,6 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       ├── camera.rs
     │       ├── components.rs
     │       ├── config.rs
-    │       ├── cursor.rs
     │       ├── lib.rs
     │       ├── look.rs
     │       ├── movement.rs
@@ -60,12 +60,14 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       └── plugin.rs
     └── rc-world/           # geração/spawn inicial do mundo
         └── src/
+            ├── chunk_map.rs
             ├── components.rs
             ├── config.rs
             ├── diagnostics.rs
             ├── generation.rs
             ├── lib.rs
             ├── plugin.rs
+            ├── remesh.rs
             └── spawn.rs
 ```
 
@@ -81,6 +83,10 @@ rc-input: mapeia KeyCode para PlayerAction
 rc-input: ActionState com intenções de jogo
         ↓
 rc-player: gira e movimenta a câmera/player
+
+rustcraft: GameState InGame/Paused
+        ↓
+captura/libera cursor, habilita interação e controla PlayerControlState
 
 rc-voxel ─→ rc-world ─→ rc-render
   dados       geração       assets/visual
@@ -122,22 +128,27 @@ Implementado:
 - crates internas organizadas por módulos de domínio, com `lib.rs` como API pública;
 - plugin raiz do jogo compondo plugins das crates internas;
 - camada de input semântico separada de teclado físico;
-- câmera/player com mouse look, captura de cursor e movimento WASD + Space/Shift relativo à direção atual;
+- `GameState` mínimo (`InGame`/`Paused`) controlando captura/liberação de cursor e sistemas de interação;
+- `PlayerControlState` em `rc-player` para pausar mouse look/movimento sem acoplar o player ao estado do app;
+- câmera/player com mouse look e movimento WASD + Space/Shift relativo à direção atual;
 - modelo de blocos baseado em `BlockId`, `BlockState`, `BlockDefinition` e registry mínimo;
 - `Chunk` puro em `rc-voxel`, armazenando `BlockState` sem depender de Bevy;
+- `ChunkMap` em `rc-world`, ligando `ChunkCoord` a dados de chunk, entidade renderizável e flag dirty;
 - geração determinística com `WorldSeed` e `TerrainGenerator`;
 - geração inicial de chunk em `rc-world::generate_chunk`;
 - geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
 - spawn inicial com uma entidade renderizável por chunk;
+- rebuild de mesh para chunks dirty depois de alteração de bloco;
 - diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
 - raycast de interação a partir da câmera/player, com conversão para `BlockPos` e highlight debug do bloco mirado;
+- quebra de bloco com clique esquerdo, alterando o dado do chunk e reconstruindo a mesh;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
 - o chunk inicial ainda usa material único temporário;
-- a interação com bloco ainda é apenas highlight visual de debug; quebrar/colocar bloco entra depois;
-- a captura de cursor ainda não é controlada por `GameState`; por enquanto, clique esquerdo captura e `Esc` libera;
+- ainda não há colocar bloco, inventário ou seleção persistente de bloco mirado;
+- o pause ainda não tem UI própria; `Esc` alterna diretamente entre gameplay e pausa;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
 - a função de terreno usa uma fórmula simples com seno/cosseno e seed; noise procedural real entra depois.
