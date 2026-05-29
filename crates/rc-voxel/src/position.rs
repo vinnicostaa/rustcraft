@@ -60,6 +60,44 @@ const BLOCK_HIT_EPSILON: f32 = 0.001;
 /// O ponto do hit costuma ficar exatamente na face do bloco. Para descobrir o
 /// bloco atingido, a função desloca o ponto levemente para dentro da face usando
 /// a normal e só então converte coordenadas de mundo para coordenadas voxel.
+pub fn adjacent_block_pos_from_hit(
+    point: [f32; 3],
+    normal: [f32; 3],
+    block_size: f32,
+) -> Option<BlockPos> {
+    if !block_size.is_finite() || block_size <= 0.0 {
+        return None;
+    }
+
+    if !point.iter().all(|value| value.is_finite()) {
+        return None;
+    }
+
+    if !normal.iter().all(|value| value.is_finite()) {
+        return None;
+    }
+
+    let normal_length =
+        (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
+
+    if normal_length <= f32::EPSILON {
+        return None;
+    }
+
+    let nudge = block_size * BLOCK_HIT_EPSILON;
+    let inside_point = [
+        point[0] + normal[0] / normal_length * nudge,
+        point[1] + normal[1] / normal_length * nudge,
+        point[2] + normal[2] / normal_length * nudge,
+    ];
+
+    Some(BlockPos::new(
+        world_coord_to_block(inside_point[0], block_size),
+        world_coord_to_block(inside_point[1], block_size),
+        world_coord_to_block(inside_point[2], block_size),
+    ))
+}
+
 pub fn block_pos_from_hit(point: [f32; 3], normal: [f32; 3], block_size: f32) -> Option<BlockPos> {
     if !block_size.is_finite() || block_size <= 0.0 {
         return None;

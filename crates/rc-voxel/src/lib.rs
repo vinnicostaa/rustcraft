@@ -14,5 +14,5 @@ mod registry;
 pub use block::{AIR, BlockId, BlockState, DIRT, GRASS, STONE};
 pub use chunk::Chunk;
 pub use generation::block_for_layer;
-pub use position::{BlockPos, ChunkCoord, block_pos_from_hit};
+pub use position::{BlockPos, ChunkCoord, adjacent_block_pos_from_hit, block_pos_from_hit};
 pub use registry::{BlockDefinition, block_definition};

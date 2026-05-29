@@ -6,7 +6,7 @@ use bevy::{
 };
 use rc_player::Player;
 use rc_render::RenderConfig;
-use rc_voxel::{BlockState, block_pos_from_hit};
+use rc_voxel::{BlockState, STONE, adjacent_block_pos_from_hit, block_pos_from_hit};
 use rc_world::{ChunkMap, GeneratedChunk, WorldConfig};
 
 const PLAYER_REACH: f32 = 8.0;
@@ -81,11 +81,25 @@ fn draw_player_chunk_raycast(
         return;
     };
 
+    let Some(block_pos) = adjacent_block_pos_from_hit(
+        hit.point.to_array(),
+        normal.to_array(),
+        params.render_config.block_size,
+    ) else {
+        return;
+    };
+
     // --- Interação de quebrar bloco ---
     if params.mouse.just_pressed(MouseButton::Left) {
         params
             .chunk_map
             .set_block(block_pos, BlockState::air(), params.world_config.chunk_size);
+    } else if params.mouse.just_pressed(MouseButton::Right) {
+        params.chunk_map.set_block(
+            block_pos,
+            BlockState::new(STONE),
+            params.world_config.chunk_size,
+        );
     }
 
     // Highlight visual temporário: por enquanto isso é ferramenta de debug, não
