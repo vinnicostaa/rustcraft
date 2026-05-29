@@ -73,7 +73,7 @@ fn draw_player_chunk_raycast(
 
     let normal = hit.normal.normalize_or_zero();
 
-    let Some(block_pos) = block_pos_from_hit(
+    let Some(target_pos) = block_pos_from_hit(
         hit.point.to_array(),
         normal.to_array(),
         params.render_config.block_size,
@@ -81,22 +81,29 @@ fn draw_player_chunk_raycast(
         return;
     };
 
-    let Some(block_pos) = adjacent_block_pos_from_hit(
+    let Some(adjacent_pos) = adjacent_block_pos_from_hit(
         hit.point.to_array(),
         normal.to_array(),
         params.render_config.block_size,
     ) else {
         return;
     };
+
+    let wants_break = params.mouse.just_pressed(MouseButton::Left);
+    let wants_place = params.mouse.just_pressed(MouseButton::Right);
 
     // --- Interação de quebrar bloco ---
-    if params.mouse.just_pressed(MouseButton::Left) {
-        params
-            .chunk_map
-            .set_block(block_pos, BlockState::air(), params.world_config.chunk_size);
-    } else if params.mouse.just_pressed(MouseButton::Right) {
+    if wants_break {
         params.chunk_map.set_block(
-            block_pos,
+            target_pos,
+            BlockState::air(),
+            params.world_config.chunk_size,
+        );
+    }
+
+    if !wants_break && wants_place {
+        params.chunk_map.set_block(
+            adjacent_pos,
             BlockState::new(STONE),
             params.world_config.chunk_size,
         );
@@ -105,9 +112,9 @@ fn draw_player_chunk_raycast(
     // Highlight visual temporário: por enquanto isso é ferramenta de debug, não
     // estado de gameplay persistente.
     let block_center = Vec3::new(
-        (block_pos.x as f32 + 0.5) * params.render_config.block_size,
-        (block_pos.y as f32 + 0.5) * params.render_config.block_size,
-        (block_pos.z as f32 + 0.5) * params.render_config.block_size,
+        (target_pos.x as f32 + 0.5) * params.render_config.block_size,
+        (target_pos.y as f32 + 0.5) * params.render_config.block_size,
+        (target_pos.z as f32 + 0.5) * params.render_config.block_size,
     );
 
     gizmos.cube(
