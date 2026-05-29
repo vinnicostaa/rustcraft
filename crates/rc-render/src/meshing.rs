@@ -11,7 +11,7 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
-use rc_voxel::Chunk;
+use rc_voxel::{BlockState, Chunk, DIRT, GRASS, STONE};
 
 const VERTICES_PER_FACE: usize = 4;
 const INDICES_PER_FACE: usize = 6;
@@ -41,6 +41,7 @@ pub struct ChunkMeshData {
     /// `[0,1]²`. Quando atlas de textura entrar, este campo passará a
     /// referenciar a região correta do atlas por tipo de bloco e face.
     pub uvs: Vec<[f32; 2]>,
+    pub colors: Vec<[f32; 4]>,
     pub indices: Vec<u32>,
 }
 
@@ -80,6 +81,11 @@ impl ChunkMeshData {
             self.uvs.len(),
             "positions e uvs devem ter o mesmo comprimento"
         );
+        debug_assert_eq!(
+            self.positions.len(),
+            self.colors.len(),
+            "positions e colors devem ter o mesmo comprimento"
+        );
         debug_assert!(
             self.indices.len().is_multiple_of(INDICES_PER_FACE),
             "indices.len() deve ser múltiplo de {INDICES_PER_FACE}; encontrado {}",
@@ -104,6 +110,7 @@ impl From<ChunkMeshData> for Mesh {
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, data.positions)
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, data.normals)
         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, data.uvs)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, data.colors)
         .with_inserted_indices(Indices::U32(data.indices))
     }
 }
@@ -231,6 +238,7 @@ pub fn build_chunk_mesh_data(chunk: &Chunk, block_size: f32) -> ChunkMeshData {
         positions: Vec::with_capacity(estimated_vertices),
         normals: Vec::with_capacity(estimated_vertices),
         uvs: Vec::with_capacity(estimated_vertices),
+        colors: Vec::with_capacity(estimated_vertices),
         indices: Vec::with_capacity(estimated_faces * INDICES_PER_FACE),
     };
 
@@ -257,7 +265,8 @@ pub fn build_chunk_mesh_data(chunk: &Chunk, block_size: f32) -> ChunkMeshData {
                     };
 
                     if exposed {
-                        push_face(&mut data, x, y, z, block_size, face);
+                        let color = color_for_block(block);
+                        push_face(&mut data, x, y, z, block_size, face, color);
                     }
                 }
             }
@@ -275,6 +284,7 @@ fn push_face(
     z: i32,
     block_size: f32,
     face: FaceDefinition,
+    color: [f32; 4],
 ) {
     let base = data.positions.len() as u32;
 
@@ -294,8 +304,20 @@ fn push_face(
     // Placeholder até atlas de textura entrar: cada face ocupa o tile inteiro.
     data.uvs.extend_from_slice(&FACE_UVS);
 
+    data.colors.extend([color; VERTICES_PER_FACE]);
+
     // Dois triângulos por quad: (0,1,2) e (0,2,3).
     data.indices.extend(FACE_INDICES.map(|index| base + index));
+}
+
+/// Mapeia estado de bloco para a cor de vértice usada no render atual.
+fn color_for_block(block: BlockState) -> [f32; 4] {
+    match block.id {
+        GRASS => [0.2, 0.6, 0.1, 1.0],
+        DIRT => [0.4, 0.25, 0.1, 1.0],
+        STONE => [0.5, 0.5, 0.5, 1.0],
+        _ => [1.0, 0.0, 1.0, 1.0],
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -307,7 +329,7 @@ mod tests {
     use bevy::asset::RenderAssetUsages;
     use bevy::mesh::{Indices, Mesh};
     use bevy::render::render_resource::PrimitiveTopology;
-    use rc_voxel::{BlockState, Chunk, STONE};
+    use rc_voxel::{BlockState, Chunk, GRASS, STONE};
 
     use super::{build_chunk_mesh, build_chunk_mesh_data};
 
@@ -334,6 +356,7 @@ mod tests {
         assert_eq!(mesh.positions.len(), 24); // 6 faces × 4 vértices
         assert_eq!(mesh.normals.len(), 24);
         assert_eq!(mesh.uvs.len(), 24);
+        assert_eq!(mesh.colors.len(), 24);
         assert_eq!(mesh.indices.len(), 36); // 6 faces × 2 triângulos × 3 índices
     }
 
@@ -384,7 +407,7 @@ mod tests {
         }
     }
 
-    /// `positions`, `normals` e `uvs` devem ter sempre o mesmo comprimento.
+    /// `positions`, `normals`, `uvs` e `colors` devem ter sempre o mesmo comprimento.
     #[test]
     fn vertex_buffers_have_consistent_lengths() {
         let mut chunk = Chunk::new_filled(4, BlockState::air());
@@ -396,6 +419,7 @@ mod tests {
 
         assert_eq!(mesh.positions.len(), mesh.normals.len());
         assert_eq!(mesh.positions.len(), mesh.uvs.len());
+        assert_eq!(mesh.positions.len(), mesh.colors.len());
     }
 
     /// A conversão final deve produzir um `Mesh` compatível com renderização 3D.
@@ -414,9 +438,25 @@ mod tests {
         assert!(mesh.attribute(Mesh::ATTRIBUTE_POSITION).is_some());
         assert!(mesh.attribute(Mesh::ATTRIBUTE_NORMAL).is_some());
         assert!(mesh.attribute(Mesh::ATTRIBUTE_UV_0).is_some());
+        assert!(mesh.attribute(Mesh::ATTRIBUTE_COLOR).is_some());
 
         let indices = mesh.indices().expect("mesh deve ter índice");
         assert!(matches!(indices, Indices::U32(_)));
         assert_eq!(indices.len(), 36);
+    }
+
+    /// Diferentes tipos de blocos devem gerar cores diferentes
+    #[test]
+    fn different_block_types_produce_different_colors() {
+        let mut grass_chunk = Chunk::new_filled(2, BlockState::air());
+        grass_chunk.set(0, 0, 0, BlockState::new(GRASS));
+
+        let mut stone_chunk = Chunk::new_filled(2, BlockState::air());
+        stone_chunk.set(0, 0, 0, BlockState::new(STONE));
+
+        let grass_mesh = build_chunk_mesh_data(&grass_chunk, 1.0);
+        let stone_mesh = build_chunk_mesh_data(&stone_chunk, 1.0);
+
+        assert_ne!(grass_mesh.colors[0], stone_mesh.colors[0]);
     }
 }

@@ -131,7 +131,7 @@ Essa decisão pode ser reavaliada se a câmera virar apenas ferramenta de debug.
 
 ### Bloco lógico é separado de render
 
-`rc-voxel` define `BlockId`, `BlockState` e metadados de bloco; `rc-render` decide como transformar esses dados em material e mesh. Isso prepara o caminho para:
+`rc-voxel` define `BlockId`, `BlockState` e metadados de bloco; `rc-render` decide como transformar esses dados em mesh, material e atributos visuais como vertex colors. Isso prepara o caminho para:
 
 - textura/atlas;
 - meshing por chunk;
@@ -143,18 +143,18 @@ Essa decisão pode ser reavaliada se a câmera virar apenas ferramenta de debug.
 
 O spawn principal já usa uma entidade renderizável para o chunk inicial, gerada a partir de `Chunk` + mesh com faces expostas.
 
-O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, spawn inicial por chunk, quebra de bloco por raycast e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
+O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, vertex colors por tipo de bloco, spawn inicial por chunk, quebra/colocação mínima de bloco por raycast e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
 
-1. recuperar material/visual por tipo de bloco via atlas, vertex color ou abordagem equivalente;
-2. colocar bloco usando a mesma base de `ChunkMap` + dirty/remesh;
+1. evoluir de vertex colors para atlas de textura, array texture ou abordagem equivalente;
+2. introduzir inventário/seleção de bloco para substituir o bloco fixo usado na colocação mínima;
 3. colliders por chunk, não por bloco individual;
 4. consulta de chunks vizinhos para remover faces internas entre chunks.
 
 ## Próximas fronteiras recomendadas
 
-1. Recuperar material por tipo de bloco sem voltar ao spawn por bloco.
+1. Evoluir vertex colors para atlas de textura ou array texture sem voltar ao spawn por bloco.
 2. Criar UI mínima de pausa/menu sem misturar estado do app com estado do player.
-3. Evoluir a interação de bloco para colocar bloco e estado persistente de bloco mirado.
+3. Evoluir a interação de bloco para inventário, seleção de bloco e estado persistente de bloco mirado.
 4. Medir tempo de meshing quando chunk map/streaming existir.
 5. Integrar Rapier com collider por chunk.
 6. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.

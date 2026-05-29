@@ -13,6 +13,7 @@ pub struct BlockRenderAssets {
     grass_material: Handle<StandardMaterial>,
     dirt_material: Handle<StandardMaterial>,
     stone_material: Handle<StandardMaterial>,
+    chunk_material: Handle<StandardMaterial>,
 }
 
 impl BlockRenderAssets {
@@ -37,7 +38,7 @@ impl BlockRenderAssets {
     /// vertex color ou outro caminho de material por face entram depois sem
     /// voltar ao spawn de uma entidade por bloco.
     pub fn chunk_material(&self) -> Handle<StandardMaterial> {
-        self.grass_material.clone()
+        self.chunk_material.clone()
     }
 }
 
@@ -53,11 +54,13 @@ pub(crate) fn setup_block_assets(
     let grass_material = materials.add(block_material(Color::srgb(0.2, 0.6, 0.1)));
     let dirt_material = materials.add(block_material(Color::srgb(0.4, 0.25, 0.1)));
     let stone_material = materials.add(block_material(Color::srgb(0.5, 0.5, 0.5)));
+    let chunk_material = materials.add(block_material(Color::WHITE));
 
     commands.insert_resource(BlockRenderAssets {
         block_mesh,
         grass_material,
         dirt_material,
         stone_material,
+        chunk_material,
     });
 }

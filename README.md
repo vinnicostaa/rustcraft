@@ -118,7 +118,7 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 O protótipo já gera o mundo inicial como dados de `Chunk`, transforma esse chunk em um `Mesh` Bevy com apenas faces expostas e spawna uma entidade renderizável para o chunk inicial.
 
-Esse caminho remove o custo estrutural de uma entidade renderizável por bloco comum de terreno. A renderização ainda é temporária visualmente: o chunk usa um material único até existir atlas de textura, vertex color ou outro mecanismo de material por face/bloco.
+Esse caminho remove o custo estrutural de uma entidade renderizável por bloco comum de terreno. A renderização agora usa uma mesh agregada por chunk com vertex colors por tipo de bloco; atlas de textura ou outro mecanismo de material por face/bloco ficam como próxima evolução visual.
 
 Implementado:
 
@@ -137,17 +137,19 @@ Implementado:
 - geração determinística com `WorldSeed` e `TerrainGenerator`;
 - geração inicial de chunk em `rc-world::generate_chunk`;
 - geração de mesh por chunk em `rc-render::build_chunk_mesh_data` e `rc-render::build_chunk_mesh`;
+- vertex colors por tipo de bloco na mesh do chunk, distinguindo grama, terra e pedra sem voltar ao spawn por bloco;
 - spawn inicial com uma entidade renderizável por chunk;
 - rebuild de mesh para chunks dirty depois de alteração de bloco;
 - diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
 - raycast de interação a partir da câmera/player, com conversão para `BlockPos` e highlight debug do bloco mirado;
 - quebra de bloco com clique esquerdo, alterando o dado do chunk e reconstruindo a mesh;
+- colocação mínima de bloco com clique direito, usando bloco `STONE` fixo e marcando o chunk dirty;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
-- o chunk inicial ainda usa material único temporário;
-- ainda não há colocar bloco, inventário ou seleção persistente de bloco mirado;
+- vertex colors ainda são uma etapa visual temporária; atlas de textura ou array texture entram depois;
+- ainda não há inventário, seleção de bloco por item ou seleção persistente de bloco mirado;
 - o pause ainda não tem UI própria; `Esc` alterna diretamente entre gameplay e pausa;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
