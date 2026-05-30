@@ -1,4 +1,4 @@
-use crate::state::GameState;
+use crate::{selection::SelectedBlock, state::GameState};
 use bevy::{
     ecs::system::SystemParam,
     picking::prelude::{MeshRayCast, MeshRayCastSettings, RayCastVisibility},
@@ -6,7 +6,7 @@ use bevy::{
 };
 use rc_player::Player;
 use rc_render::RenderConfig;
-use rc_voxel::{BlockState, STONE, adjacent_block_pos_from_hit, block_pos_from_hit};
+use rc_voxel::{BlockState, adjacent_block_pos_from_hit, block_pos_from_hit};
 use rc_world::{ChunkMap, GeneratedChunk, WorldConfig};
 
 const PLAYER_REACH: f32 = 8.0;
@@ -22,6 +22,7 @@ struct InteractionParams<'w, 's> {
     chunk_query: Query<'w, 's, (), With<GeneratedChunk>>,
     render_config: Res<'w, RenderConfig>,
     world_config: Res<'w, WorldConfig>,
+    selected_block: Res<'w, SelectedBlock>,
     mouse: Res<'w, ButtonInput<MouseButton>>,
     chunk_map: ResMut<'w, ChunkMap>,
 }
@@ -89,22 +90,17 @@ fn draw_player_chunk_raycast(
         return;
     };
 
-    let wants_break = params.mouse.just_pressed(MouseButton::Left);
-    let wants_place = params.mouse.just_pressed(MouseButton::Right);
-
     // --- Interação de quebrar bloco ---
-    if wants_break {
+    if params.mouse.just_pressed(MouseButton::Left) {
         params.chunk_map.set_block(
             target_pos,
             BlockState::air(),
             params.world_config.chunk_size,
         );
-    }
-
-    if !wants_break && wants_place {
+    } else if params.mouse.just_pressed(MouseButton::Right) {
         params.chunk_map.set_block(
             adjacent_pos,
-            BlockState::new(STONE),
+            params.selected_block.block(),
             params.world_config.chunk_size,
         );
     }

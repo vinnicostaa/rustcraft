@@ -6,6 +6,7 @@
 pub mod app;
 mod diagnostics;
 mod interaction;
+mod selection;
 mod state;
 
 pub use app::run;
