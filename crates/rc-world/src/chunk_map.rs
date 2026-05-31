@@ -7,13 +7,18 @@ pub struct ChunkMap {
     chunks: HashMap<ChunkCoord, ChunkEntry>,
 }
 
+/// Dados associados a um chunk carregado no mundo.
 pub struct ChunkEntry {
+    /// Dados voxel puros do chunk.
     pub data: Chunk,
+    /// Entidade Bevy que renderiza este chunk.
     pub entity: Entity,
+    /// Marca se a mesh precisa ser reconstruída.
     pub dirty: bool,
 }
 
 impl ChunkMap {
+    /// Insere ou substitui um chunk carregado.
     pub fn insert(&mut self, coord: ChunkCoord, data: Chunk, entity: Entity) {
         self.chunks.insert(
             coord,
@@ -25,14 +30,17 @@ impl ChunkMap {
         );
     }
 
+    /// Retorna uma entrada de chunk por coordenada.
     pub fn get(&self, coord: ChunkCoord) -> Option<&ChunkEntry> {
         self.chunks.get(&coord)
     }
 
+    /// Retorna uma entrada mutável de chunk por coordenada.
     pub fn get_mut(&mut self, coord: ChunkCoord) -> Option<&mut ChunkEntry> {
         self.chunks.get_mut(&coord)
     }
 
+    /// Marca um chunk carregado para reconstrução de mesh.
     pub fn mark_dirty(&mut self, coord: ChunkCoord) -> bool {
         let Some(entry) = self.chunks.get_mut(&coord) else {
             return false;
@@ -42,10 +50,12 @@ impl ChunkMap {
         true
     }
 
+    /// Retorna a quantidade de chunks carregados.
     pub fn len(&self) -> usize {
         self.chunks.len()
     }
 
+    /// Retorna se não há chunks carregados.
     pub fn is_empty(&self) -> bool {
         self.chunks.is_empty()
     }

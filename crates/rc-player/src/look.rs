@@ -4,10 +4,10 @@ use std::f32::consts::FRAC_PI_2;
 
 const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
 
-/// Gira o player/camera a partir do movimento acumulado do mouse no frame.
+/// Gira o player/câmera a partir do movimento acumulado do mouse no frame.
 ///
-/// A rotacao usa a ordem YXZ: yaw no eixo Y, pitch no eixo X e roll preservado.
-/// O pitch fica limitado para evitar que a camera vire alem da vertical.
+/// A rotação usa a ordem YXZ: yaw no eixo Y, pitch no eixo X e roll preservado.
+/// O pitch fica limitado para evitar que a câmera vire além da vertical.
 pub(crate) fn look_player(
     mouse_motion: Res<AccumulatedMouseMotion>,
     config: Res<PlayerConfig>,

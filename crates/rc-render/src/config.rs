@@ -1,10 +1,13 @@
 use bevy::prelude::Resource;
 
-/// Simple visual settings for the prototype.
+/// Configurações visuais simples do protótipo.
 #[derive(Resource, Debug, Clone, Copy)]
 pub struct RenderConfig {
+    /// Tamanho de um bloco voxel em unidades de mundo Bevy.
     pub block_size: f32,
+    /// Intensidade da luz solar direcional.
     pub sun_illuminance: f32,
+    /// Habilita sombras na luz principal quando suportado pelo pipeline.
     pub shadows_enabled: bool,
 }
 

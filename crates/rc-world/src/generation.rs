@@ -1,7 +1,7 @@
 use crate::WorldSeed;
 use rc_voxel::{BlockState, Chunk, ChunkCoord, block_for_layer};
 
-/// Gerador deterministico de terreno.
+/// Gerador determinístico de terreno.
 #[derive(Debug, Clone, Copy)]
 pub struct TerrainGenerator {
     seed: WorldSeed,

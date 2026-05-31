@@ -32,11 +32,11 @@ impl BlockRenderAssets {
         }
     }
 
-    /// Material temporário para a mesh agregada do chunk.
+    /// Material base para a mesh agregada do chunk.
     ///
-    /// Uma única mesh Bevy usa um material simples neste estágio. Atlas,
-    /// vertex color ou outro caminho de material por face entram depois sem
-    /// voltar ao spawn de uma entidade por bloco.
+    /// A cor visual atual vem dos vertex colors emitidos no meshing, então o
+    /// material fica neutro. Atlas, array texture ou outro caminho de textura
+    /// por face entram depois sem voltar ao spawn de uma entidade por bloco.
     pub fn chunk_material(&self) -> Handle<StandardMaterial> {
         self.chunk_material.clone()
     }

@@ -17,6 +17,15 @@ Este documento registra o padrao de desenvolvimento do `rustcraft`.
 - Prefira APIs e idioms usados pelo provedor da dependencia quando eles forem compativeis com as fronteiras do projeto.
 - Se a solucao do provedor conflitar com uma decisao local, registre o motivo no README, ARCHITECTURE ou vault.
 - Nao trate memoria de API como fonte suficiente quando a informacao puder ser confirmada localmente.
+- Quando a API puder ter mudado entre versoes, confira a versao exata usada pelo projeto antes de orientar a task.
+
+## Pesquisa antes de orientar ou implementar
+
+- Trate o vault como graph-rag do projeto: leia MOCs, `STATE`, `ROADMAP`, audit canonico e notas vivas relacionadas antes de propor mudanca estrutural.
+- Diferencie documento vivo de log historico. Atualize documentos vivos quando o estado mudar; preserve audit logs datados como evidencia do contexto daquela data, salvo quando a propria nota estiver incorreta.
+- Para Bevy e crates, prefira esta ordem de fontes: exemplos oficiais instalados, codigo-fonte instalado da versao em uso, documentacao oficial equivalente e, por fim, pesquisa externa.
+- Registre a fonte tecnica quando ela afetar arquitetura, fluxo didatico ou padrao de implementacao.
+- Antes de documentar o projeto, audite README, ARCHITECTURE, CODING_PRACTICES, AGENTS, `crates/*/src/lib.rs` e as notas vivas do vault.
 
 ## Organizacao Rust
 

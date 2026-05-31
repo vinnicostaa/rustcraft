@@ -2,13 +2,14 @@ use bevy::prelude::*;
 
 use crate::{ActionState, bindings::KEY_BINDINGS};
 
-/// Runtime set for systems that translate physical input into game actions.
+/// Set de runtime para sistemas que traduzem input físico em ações de jogo.
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum InputSet {
+    /// Coleta input bruto e atualiza `ActionState`.
     CollectInput,
 }
 
-/// Translates raw Bevy keyboard input into semantic game actions.
+/// Traduz input bruto de teclado do Bevy em ações semânticas.
 pub struct InputPlugin;
 
 impl Plugin for InputPlugin {

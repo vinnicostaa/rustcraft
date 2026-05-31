@@ -4,12 +4,14 @@ use crate::{PlayerConfig, camera::spawn_player, look::look_player, movement::mov
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash, States)]
 pub enum PlayerControlState {
+    /// Mouse look e movimento aceitam input.
     #[default]
     Enabled,
+    /// Mouse look e movimento ficam pausados.
     Disabled,
 }
 
-/// Plugin do controlador de camera/player.
+/// Plugin do controlador de câmera/player.
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {

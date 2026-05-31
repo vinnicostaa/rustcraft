@@ -1,3 +1,9 @@
+//! Renderização voxel e recursos visuais Bevy.
+//!
+//! Esta crate transforma dados puros de `rc-voxel`, como `Chunk` e
+//! `BlockState`, em meshes, materiais e recursos Bevy. Ela não gera terreno nem
+//! decide estado de mundo.
+
 mod assets;
 mod config;
 mod lighting;

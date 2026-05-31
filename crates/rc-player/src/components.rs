@@ -1,5 +1,5 @@
 use bevy::prelude::Component;
 
-/// Controlled player/camera entity for the initial prototype.
+/// Entidade controlada do player/câmera no protótipo atual.
 #[derive(Component, Debug)]
 pub struct Player;

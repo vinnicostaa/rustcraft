@@ -5,7 +5,7 @@ use crate::{
 use bevy::prelude::*;
 use rc_render::RenderStartupSet;
 
-/// World/terrain plugin.
+/// Plugin de mundo e terreno.
 pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
