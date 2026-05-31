@@ -30,12 +30,16 @@ graph TD
     M --> O[PlayerControlState]
     O --> D
     M --> P[rustcraft interaction/raycast]
+    M --> S[rustcraft selection]
+    M --> U[rustcraft hotbar UI]
 
     J[rc-voxel BlockId / BlockState / Chunk] --> H[rc-world generate_chunk]
     H --> Q[rc-world ChunkMap]
     Q --> I[rc-render build_chunk_mesh]
     I --> K[GeneratedChunk + Mesh3d]
     K --> L[Bevy renderer]
+    S --> P
+    S --> U
     P --> Q
 ```
 
@@ -43,7 +47,7 @@ graph TD
 
 | Package | Responsabilidade atual | Não deve assumir |
 | --- | --- | --- |
-| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin`, `GameState`, pausa/cursor e composição dos plugins internos. | Dados voxel, render assets ou input físico. |
+| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin`, `GameState`, pausa/cursor, seleção/hotbar mínima e composição dos plugins internos. | Dados voxel puros, render assets ou input físico. |
 | `rc-input` | `PlayerAction`, `ActionState`, bindings teclado → ação e `InputPlugin`. | Mover player, gerar mundo ou conhecer render. |
 | `rc-player` | `Player`, `PlayerConfig`, `PlayerControlState`, spawn da câmera/player, mouse look e movimento por ações. | Ler `KeyCode` diretamente, conhecer `GameState`, gerar terreno ou criar materiais. |
 | `rc-voxel` | Dados voxel puros: `BlockId`, `BlockState`, definições/registry, posições e `Chunk`. | Depender de Bevy, meshes, materials, input ou player. |
@@ -68,12 +72,16 @@ PreUpdate / rc-input::InputSet::CollectInput
     ↓
 Update / rustcraft::toggle_pause
     ↓
+Update / rustcraft::selection
+    ↓
+Update / rustcraft::hotbar
+    ↓
 Update / rc-player::look_player -> rc-player::move_player
     ↓
 PostUpdate / rustcraft::interaction -> rc-world::rebuild_dirty_chunks
 ```
 
-O input é coletado em `PreUpdate`; `GameState` alterna `InGame`/`Paused`; `PlayerControlState` habilita ou desabilita `look_player`/`move_player`; e a interação com bloco só roda enquanto o jogo está em `InGame`.
+O input é coletado em `PreUpdate`; `GameState` alterna `InGame`/`Paused`; `SelectedBlock` guarda a seleção mínima de bloco para colocação; a hotbar visual reflete essa seleção enquanto o jogo está em `InGame`; `PlayerControlState` habilita ou desabilita `look_player`/`move_player`; e a interação com bloco só roda enquanto o jogo está em `InGame`.
 
 ## Decisões atuais
 
@@ -143,10 +151,10 @@ Essa decisão pode ser reavaliada se a câmera virar apenas ferramenta de debug.
 
 O spawn principal já usa uma entidade renderizável para o chunk inicial, gerada a partir de `Chunk` + mesh com faces expostas.
 
-O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, vertex colors por tipo de bloco, spawn inicial por chunk, quebra/colocação mínima de bloco por raycast e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
+O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, vertex colors por tipo de bloco, spawn inicial por chunk, quebra/colocação mínima de bloco por raycast, hotbar visual mínima e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
 
 1. evoluir de vertex colors para atlas de textura, array texture ou abordagem equivalente;
-2. introduzir inventário/seleção de bloco para substituir o bloco fixo usado na colocação mínima;
+2. evoluir a seleção mínima/hotbar visual para inventário por item, quantidades e itens reais;
 3. colliders por chunk, não por bloco individual;
 4. consulta de chunks vizinhos para remover faces internas entre chunks.
 
@@ -154,7 +162,7 @@ O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk c
 
 1. Evoluir vertex colors para atlas de textura ou array texture sem voltar ao spawn por bloco.
 2. Criar UI mínima de pausa/menu sem misturar estado do app com estado do player.
-3. Evoluir a interação de bloco para inventário, seleção de bloco e estado persistente de bloco mirado.
+3. Evoluir a interação de bloco para inventário real e estado persistente de bloco mirado.
 4. Medir tempo de meshing quando chunk map/streaming existir.
 5. Integrar Rapier com collider por chunk.
 6. Consultar chunks vizinhos no meshing para evitar faces internas entre chunks.

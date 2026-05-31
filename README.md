@@ -20,8 +20,10 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │   └── src/
     │       ├── app.rs
     │       ├── diagnostics.rs
+    │       ├── hotbar.rs
     │       ├── interaction.rs
     │       ├── lib.rs
+    │       ├── selection.rs
     │       ├── state.rs
     │       └── bin/
     │           └── rustcraft.rs
@@ -86,7 +88,7 @@ rc-player: gira e movimenta a câmera/player
 
 rustcraft: GameState InGame/Paused
         ↓
-captura/libera cursor, habilita interação e controla PlayerControlState
+captura/libera cursor, habilita interação, hotbar UI e PlayerControlState
 
 rc-voxel ─→ rc-world ─→ rc-render
   dados       geração       assets/visual
@@ -143,13 +145,15 @@ Implementado:
 - diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
 - raycast de interação a partir da câmera/player, com conversão para `BlockPos` e highlight debug do bloco mirado;
 - quebra de bloco com clique esquerdo, alterando o dado do chunk e reconstruindo a mesh;
-- colocação mínima de bloco com clique direito, usando bloco `STONE` fixo e marcando o chunk dirty;
+- seleção mínima de bloco com `1`/`2`/`3` para grama, terra e pedra;
+- hotbar visual mínima com Bevy UI nativo, mostrando slots `1`/`2`/`3` e destaque do bloco selecionado;
+- colocação mínima de bloco com clique direito, usando o bloco selecionado e marcando o chunk dirty;
 - assets compartilhados para mesh/material de blocos em crate render.
 
 Limitações atuais:
 
 - vertex colors ainda são uma etapa visual temporária; atlas de textura ou array texture entram depois;
-- ainda não há inventário, seleção de bloco por item ou seleção persistente de bloco mirado;
+- ainda não há inventário por item, quantidades, itens reais ou seleção persistente de bloco mirado;
 - o pause ainda não tem UI própria; `Esc` alterna diretamente entre gameplay e pausa;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;

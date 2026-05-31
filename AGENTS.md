@@ -31,6 +31,8 @@ Antes de propor ou alterar codigo, leia:
 - Se uma API puder ter mudado, confirme antes de orientar a task.
 - Antes de propor padrao de implementacao para APIs de dependencias, verifique como o provedor da dependencia faz nos exemplos oficiais, docs ou codigo-fonte instalado. Prefira o padrao do provedor quando ele for compativel com a arquitetura do projeto.
 - Registre no vault decisoes ou mudancas estruturais relevantes.
+- Use o vault como graph-rag do projeto: leia MOCs, `STATE`, `ROADMAP`, audit canonico e notas vivas relacionadas antes de propor mudanca estrutural.
+- Ao documentar ou revisar estado do projeto, audite README, ARCHITECTURE, CODING_PRACTICES, AGENTS, `crates/*/src/lib.rs` e notas vivas do vault; nao confunda audit logs historicos com estado atual.
 
 ## Fluxo de trabalho
 
@@ -74,4 +76,6 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 - O spawn principal usa uma entidade renderizavel para o chunk inicial.
 - `GameState` controla pausa/cursor no app principal, enquanto `PlayerControlState` controla look/movimento em `rc-player`.
 - `ChunkMap` registra chunks carregados, entidade renderizavel e flag dirty; quebrar bloco altera dado de chunk e reconstrói a mesh.
-- As proximas frentes tecnicas provaveis sao colocar bloco/inventario minimo, UI de pause/menu e recuperar material por bloco sem voltar ao spawn por bloco.
+- `SelectedBlock` permite seleção mínima de bloco com `1`/`2`/`3`; clique direito coloca o bloco selecionado e marca o chunk dirty.
+- A hotbar visual mínima já existe em `crates/rustcraft/src/hotbar.rs` usando Bevy UI nativo.
+- As proximas frentes tecnicas provaveis sao inventario por item, estado persistente de bloco mirado, UI de pause/menu e atlas/array texture sem voltar ao spawn por bloco.

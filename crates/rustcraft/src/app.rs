@@ -1,6 +1,7 @@
 use crate::{
-    diagnostics::RustcraftDiagnosticsPlugin, interaction::RustcraftInteractionPlugin,
-    selection::RustcraftSelectionPlugin, state::RustcraftStatePlugin,
+    diagnostics::RustcraftDiagnosticsPlugin, hotbar::RustcraftHotbarPlugin,
+    interaction::RustcraftInteractionPlugin, selection::RustcraftSelectionPlugin,
+    state::RustcraftStatePlugin,
 };
 use bevy::prelude::*;
 use rc_input::InputPlugin;
@@ -25,6 +26,7 @@ impl Plugin for RustcraftPlugin {
             PlayerPlugin,
             RustcraftInteractionPlugin,
             RustcraftSelectionPlugin,
+            RustcraftHotbarPlugin,
         ));
     }
 }
