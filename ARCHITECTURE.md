@@ -29,9 +29,9 @@ graph TD
     M[rustcraft GameState] --> N[CursorOptions]
     M --> O[PlayerControlState]
     O --> D
-    M --> P[rustcraft interaction/raycast]
-    M --> S[rustcraft selection]
-    M --> U[rustcraft hotbar UI]
+    M --> P[rc-interaction raycast]
+    M --> S[rc-inventory selection]
+    M --> U[rc-ui hotbar UI]
 
     J[rc-voxel BlockId / BlockState / Chunk] --> H[rc-world generate_chunk]
     H --> Q[rc-world ChunkMap]
@@ -47,11 +47,14 @@ graph TD
 
 | Package | Responsabilidade atual | Não deve assumir |
 | --- | --- | --- |
-| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin`, `GameState`, pausa/cursor, seleção/hotbar mínima e composição dos plugins internos. | Dados voxel puros, render assets ou input físico. |
+| `rustcraft` | Bin/app principal: `DefaultPlugins`, `RustcraftPlugin`, `GameState`, pausa/cursor, diagnósticos gerais e composição dos plugins internos. | Dados voxel puros, render assets, input físico, estado de inventário, HUD ou regras de interação com bloco. |
 | `rc-input` | `PlayerAction`, `ActionState`, bindings teclado → ação e `InputPlugin`. | Mover player, gerar mundo ou conhecer render. |
+| `rc-interaction` | Raycast do player contra chunks, `AimedBlock`, quebra/colocação mínima e ponte entre inventário e mundo. | Desenhar HUD, gerar chunks, conhecer `rustcraft::GameState` ou decidir inventário por item. |
+| `rc-inventory` | `SelectedBlock`, definição dos slots mínimos da hotbar e seleção por tecla enquanto o app permite gameplay. | Desenhar UI, alterar mundo, conhecer `rustcraft::GameState` ou mover player. |
 | `rc-player` | `Player`, `PlayerConfig`, `PlayerControlState`, spawn da câmera/player, mouse look e movimento por ações. | Ler `KeyCode` diretamente, conhecer `GameState`, gerar terreno ou criar materiais. |
 | `rc-voxel` | Dados voxel puros: `BlockId`, `BlockState`, definições/registry, posições e `Chunk`. | Depender de Bevy, meshes, materials, input ou player. |
 | `rc-render` | `RenderConfig`, iluminação, materiais, assets visuais e conversão de `Chunk` em mesh Bevy. | Gerar terreno, possuir estado de mundo ou mapear controles. |
+| `rc-ui` | HUD de gameplay atual: hotbar visual Bevy UI, leitura de `SelectedBlock` e visibilidade por estado ativo/pausado. | Alterar mundo, decidir regras de inventário, mover player ou depender diretamente de `rustcraft::GameState`. |
 | `rc-world` | `WorldConfig`, seed, geração de chunk, `ChunkMap`, spawn da entidade renderizável, dirty/remesh e diagnósticos de mundo. | Mapear teclas, mover player ou decidir detalhes visuais internos do render. |
 
 ## Ordem dos sistemas
@@ -72,16 +75,16 @@ PreUpdate / rc-input::InputSet::CollectInput
     ↓
 Update / rustcraft::toggle_pause
     ↓
-Update / rustcraft::selection
+Update / rc-inventory::select_block_from_hotbar
     ↓
-Update / rustcraft::hotbar
+Update / rc-ui::hotbar
     ↓
 Update / rc-player::look_player -> rc-player::move_player
     ↓
-PostUpdate / rustcraft::interaction -> rc-world::rebuild_dirty_chunks
+PostUpdate / rc-interaction -> rc-world::rebuild_dirty_chunks
 ```
 
-O input é coletado em `PreUpdate`; `GameState` alterna `InGame`/`Paused`; `SelectedBlock` guarda a seleção mínima de bloco para colocação; a hotbar visual reflete essa seleção enquanto o jogo está em `InGame`; `PlayerControlState` habilita ou desabilita `look_player`/`move_player`; e a interação com bloco só roda enquanto o jogo está em `InGame`.
+O input é coletado em `PreUpdate`; `GameState` alterna `InGame`/`Paused`; `rc-inventory::SelectedBlock` guarda a seleção mínima de bloco para colocação; a hotbar visual reflete essa seleção enquanto o jogo está em `InGame`; `PlayerControlState` habilita ou desabilita `look_player`/`move_player`; e a interação com bloco só roda enquanto o jogo está em `InGame`.
 
 ## Decisões atuais
 
@@ -96,9 +99,12 @@ A estrutura agora implementa a ADR-0003 registrada no vault:
 ```text
 crates/rustcraft   # bin/app principal
 crates/rc-input    # input bruto -> ações semânticas
+crates/rc-interaction # raycast, bloco mirado e ações de bloco
+crates/rc-inventory # seleção mínima de bloco e base de inventário
 crates/rc-player   # player/câmera/controlador
 crates/rc-voxel    # dados voxel puros
 crates/rc-render   # luz, materiais, meshes, render plugin
+crates/rc-ui       # HUD/UI de gameplay
 crates/rc-world    # geração/spawn inicial do mundo
 ```
 
@@ -107,13 +113,26 @@ O grafo intencional é:
 ```text
 rustcraft
 ├── rc-input
+├── rc-interaction ──→ rc-inventory, rc-player, rc-render, rc-voxel, rc-world
+├── rc-inventory ──→ rc-voxel
 ├── rc-player ──→ rc-input
 ├── rc-voxel
 ├── rc-render ──→ rc-voxel
+├── rc-ui ──→ rc-inventory, rc-voxel
 └── rc-world  ──→ rc-voxel, rc-render
 ```
 
-`rc-voxel` fica sem dependência de Bevy para manter a fronteira de domínio mais pura.
+`rc-voxel` fica sem dependência de Bevy para manter a fronteira de domínio mais pura. `rc-inventory` ainda depende de Bevy porque a seleção mínima atual é um `Resource` acionado por `KeyCode`, mas ele recebe o estado ativo como parâmetro genérico do plugin para não depender do app principal.
+
+### Gameplay/UI mínimos saíram do app root
+
+`SelectedBlock`, `HOTBAR_SLOTS` e a seleção por teclas `1`/`2`/`3` pertencem a `rc-inventory`. O app principal só informa em qual estado essa seleção roda, usando `InventoryPlugin::active_in(GameState::InGame)`.
+
+Raycast, `AimedBlock`, quebra e colocação mínima pertencem a `rc-interaction`, registrado com `InteractionPlugin::active_in(GameState::InGame)`.
+
+Hotbar visual pertence a `rc-ui`, registrado com `UiPlugin::visible_in(GameState::InGame, GameState::Paused)`.
+
+Essa separação deixa `rustcraft` como compositor de plugins e dono do estado global do app, sem ser dono direto de inventário, UI ou interação de bloco.
 
 ### Input bruto não move gameplay diretamente
 
@@ -151,7 +170,7 @@ Essa decisão pode ser reavaliada se a câmera virar apenas ferramenta de debug.
 
 O spawn principal já usa uma entidade renderizável para o chunk inicial, gerada a partir de `Chunk` + mesh com faces expostas.
 
-O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, vertex colors por tipo de bloco, spawn inicial por chunk, quebra/colocação mínima de bloco por raycast, hotbar visual mínima e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
+O projeto já tem `Chunk` em memória, `ChunkMap`, geração de mesh por chunk com faces expostas, vertex colors por tipo de bloco, spawn inicial por chunk, seleção mínima em `rc-inventory`, quebra/colocação mínima de bloco por raycast em `rc-interaction`, hotbar visual mínima em `rc-ui` e rebuild de mesh para chunks dirty. As próximas etapas técnicas importantes são:
 
 1. evoluir de vertex colors para atlas de textura, array texture ou abordagem equivalente;
 2. evoluir a seleção mínima/hotbar visual para inventário por item, quantidades e itens reais;

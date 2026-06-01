@@ -64,9 +64,12 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 
 - `rustcraft`: composicao do app Bevy.
 - `rc-input`: input fisico para acoes semanticas.
+- `rc-interaction`: raycast, bloco mirado e ações mínimas de quebrar/colocar.
+- `rc-inventory`: seleção mínima de bloco e base para inventário.
 - `rc-player`: player, camera e movimento.
 - `rc-voxel`: dados voxel puros, sem Bevy.
 - `rc-render`: assets, materiais, iluminacao e mesh Bevy.
+- `rc-ui`: HUD/UI de gameplay, incluindo hotbar visual.
 - `rc-world`: configuracao, geracao e spawn do mundo.
 
 ## Estado tecnico atual
@@ -76,6 +79,7 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 - O spawn principal usa uma entidade renderizavel para o chunk inicial.
 - `GameState` controla pausa/cursor no app principal, enquanto `PlayerControlState` controla look/movimento em `rc-player`.
 - `ChunkMap` registra chunks carregados, entidade renderizavel e flag dirty; quebrar bloco altera dado de chunk e reconstrói a mesh.
-- `SelectedBlock` permite seleção mínima de bloco com `1`/`2`/`3`; clique direito coloca o bloco selecionado e marca o chunk dirty.
-- A hotbar visual mínima já existe em `crates/rustcraft/src/hotbar.rs` usando Bevy UI nativo.
+- `rc-inventory::SelectedBlock` permite seleção mínima de bloco com `1`/`2`/`3`; clique direito coloca o bloco selecionado e marca o chunk dirty.
+- `rc-interaction::AimedBlock` guarda o bloco mirado atual; `rc-interaction` aplica quebra/colocação apenas no estado ativo informado pelo app.
+- A hotbar visual mínima já existe em `rc-ui` usando Bevy UI nativo.
 - As proximas frentes tecnicas provaveis sao inventario por item, estado persistente de bloco mirado, UI de pause/menu e atlas/array texture sem voltar ao spawn por bloco.

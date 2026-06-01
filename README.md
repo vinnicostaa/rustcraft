@@ -20,10 +20,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │   └── src/
     │       ├── app.rs
     │       ├── diagnostics.rs
-    │       ├── hotbar.rs
-    │       ├── interaction.rs
     │       ├── lib.rs
-    │       ├── selection.rs
     │       ├── state.rs
     │       └── bin/
     │           └── rustcraft.rs
@@ -34,6 +31,25 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       ├── lib.rs
     │       ├── plugin.rs
     │       └── state.rs
+    ├── rc-interaction/     # raycast, bloco mirado e ações de bloco
+    │   └── src/
+    │       ├── actions.rs
+    │       ├── aimed_block.rs
+    │       ├── gizmo.rs
+    │       ├── plugin.rs
+    │       ├── raycast.rs
+    │       └── lib.rs
+    ├── rc-inventory/       # seleção mínima de bloco e base de inventário
+    │   └── src/
+    │       ├── lib.rs
+    │       ├── plugin.rs
+    │       ├── selected.rs
+    │       └── slots.rs
+    ├── rc-ui/              # HUD e UI de gameplay
+    │   └── src/
+    │       ├── hotbar.rs
+    │       ├── lib.rs
+    │       └── plugin.rs
     ├── rc-player/          # player/câmera/controlador
     │   └── src/
     │       ├── camera.rs
@@ -88,7 +104,7 @@ rc-player: gira e movimenta a câmera/player
 
 rustcraft: GameState InGame/Paused
         ↓
-captura/libera cursor, habilita interação, hotbar UI e PlayerControlState
+captura/libera cursor e informa estados ativos aos plugins
 
 rc-voxel ─→ rc-world ─→ rc-render
   dados       geração       assets/visual
@@ -126,10 +142,13 @@ Implementado:
 
 - workspace Cargo;
 - package principal em `crates/rustcraft`;
-- library crates internas `rc-input`, `rc-player`, `rc-voxel`, `rc-render` e `rc-world`;
+- library crates internas `rc-input`, `rc-interaction`, `rc-inventory`, `rc-player`, `rc-voxel`, `rc-render`, `rc-ui` e `rc-world`;
 - crates internas organizadas por módulos de domínio, com `lib.rs` como API pública;
 - plugin raiz do jogo compondo plugins das crates internas;
 - camada de input semântico separada de teclado físico;
+- seleção mínima de bloco isolada em `rc-inventory`, com slots `1`/`2`/`3` para grama, terra e pedra;
+- interação de bloco isolada em `rc-interaction`, com raycast, `AimedBlock`, quebra e colocação mínima;
+- hotbar visual isolada em `rc-ui`, lendo `rc-inventory::SelectedBlock`;
 - `GameState` mínimo (`InGame`/`Paused`) controlando captura/liberação de cursor e sistemas de interação;
 - `PlayerControlState` em `rc-player` para pausar mouse look/movimento sem acoplar o player ao estado do app;
 - câmera/player com mouse look e movimento WASD + Space/Shift relativo à direção atual;
@@ -143,9 +162,8 @@ Implementado:
 - spawn inicial com uma entidade renderizável por chunk;
 - rebuild de mesh para chunks dirty depois de alteração de bloco;
 - diagnósticos de runtime com FPS, frame time, contagem de entidades, CPU, memória, chunks, faces e vértices;
-- raycast de interação a partir da câmera/player, com conversão para `BlockPos` e highlight debug do bloco mirado;
+- raycast de interação a partir da câmera/player, com conversão para `BlockPos`, estado `AimedBlock` e highlight debug do bloco mirado;
 - quebra de bloco com clique esquerdo, alterando o dado do chunk e reconstruindo a mesh;
-- seleção mínima de bloco com `1`/`2`/`3` para grama, terra e pedra;
 - hotbar visual mínima com Bevy UI nativo, mostrando slots `1`/`2`/`3` e destaque do bloco selecionado;
 - colocação mínima de bloco com clique direito, usando o bloco selecionado e marcando o chunk dirty;
 - assets compartilhados para mesh/material de blocos em crate render.
@@ -153,7 +171,8 @@ Implementado:
 Limitações atuais:
 
 - vertex colors ainda são uma etapa visual temporária; atlas de textura ou array texture entram depois;
-- ainda não há inventário por item, quantidades, itens reais ou seleção persistente de bloco mirado;
+- ainda não há inventário por item, quantidades ou itens reais;
+- `AimedBlock` existe, mas ainda não há UI/crosshair consumindo o estado de bloco mirado;
 - o pause ainda não tem UI própria; `Esc` alterna diretamente entre gameplay e pausa;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
