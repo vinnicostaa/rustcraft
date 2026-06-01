@@ -1,12 +1,14 @@
 use crate::{
-    diagnostics::RustcraftDiagnosticsPlugin, hotbar::RustcraftHotbarPlugin,
-    interaction::RustcraftInteractionPlugin, selection::RustcraftSelectionPlugin,
-    state::RustcraftStatePlugin,
+    diagnostics::RustcraftDiagnosticsPlugin,
+    state::{GameState, RustcraftStatePlugin},
 };
 use bevy::prelude::*;
 use rc_input::InputPlugin;
+use rc_interaction::InteractionPlugin;
+use rc_inventory::InventoryPlugin;
 use rc_player::PlayerPlugin;
 use rc_render::RenderPlugin;
+use rc_ui::UiPlugin;
 use rc_world::WorldPlugin;
 
 /// Plugin raiz do jogo.
@@ -24,9 +26,9 @@ impl Plugin for RustcraftPlugin {
             WorldPlugin,
             InputPlugin,
             PlayerPlugin,
-            RustcraftInteractionPlugin,
-            RustcraftSelectionPlugin,
-            RustcraftHotbarPlugin,
+            InventoryPlugin::active_in(GameState::InGame),
+            InteractionPlugin::active_in(GameState::InGame),
+            UiPlugin::visible_in(GameState::InGame, GameState::Paused),
         ));
     }
 }

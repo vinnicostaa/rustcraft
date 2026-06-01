@@ -1,37 +1,19 @@
 use bevy::prelude::*;
+use rc_inventory::{HOTBAR_SLOTS, SelectedBlock};
 use rc_voxel::{BlockState, DIRT, GRASS, STONE};
-
-use crate::{
-    selection::{HOTBAR_SLOTS, SelectedBlock},
-    state::GameState,
-};
 
 const SLOT_SIZE: f32 = 52.0;
 const SLOT_BORDER: f32 = 3.0;
 
 #[derive(Component)]
-struct HotbarRoot;
+pub(crate) struct HotbarRoot;
 
 #[derive(Component)]
-struct HotbarSlot {
+pub(crate) struct HotbarSlot {
     block: BlockState,
 }
 
-pub(crate) struct RustcraftHotbarPlugin;
-
-impl Plugin for RustcraftHotbarPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_hotbar)
-            .add_systems(
-                Update,
-                update_hotbar_selection.run_if(in_state(GameState::InGame)),
-            )
-            .add_systems(OnEnter(GameState::InGame), show_hotbar)
-            .add_systems(OnEnter(GameState::Paused), hide_hotbar);
-    }
-}
-
-fn spawn_hotbar(mut commands: Commands) {
+pub(crate) fn spawn_hotbar(mut commands: Commands) {
     commands
         .spawn((
             HotbarRoot,
@@ -84,7 +66,7 @@ fn spawn_hotbar(mut commands: Commands) {
         });
 }
 
-fn update_hotbar_selection(
+pub(crate) fn update_hotbar_selection(
     selected_block: Res<SelectedBlock>,
     mut slots: Query<(&HotbarSlot, &mut BorderColor)>,
 ) {
@@ -101,12 +83,13 @@ fn update_hotbar_selection(
     }
 }
 
-fn show_hotbar(mut roots: Query<&mut Visibility, With<HotbarRoot>>) {
+pub(crate) fn show_hotbar(mut roots: Query<&mut Visibility, With<HotbarRoot>>) {
     for mut visibility in &mut roots {
         *visibility = Visibility::Visible;
     }
 }
-fn hide_hotbar(mut roots: Query<&mut Visibility, With<HotbarRoot>>) {
+
+pub(crate) fn hide_hotbar(mut roots: Query<&mut Visibility, With<HotbarRoot>>) {
     for mut visibility in &mut roots {
         *visibility = Visibility::Hidden;
     }

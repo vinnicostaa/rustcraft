@@ -12,8 +12,11 @@ publish = false
 [workspace.dependencies]
 bevy = "0.18.1"
 rc-input = { path = "crates/rc-input" }
+rc-interaction = { path = "crates/rc-interaction" }
+rc-inventory = { path = "crates/rc-inventory" }
 rc-player = { path = "crates/rc-player" }
 rc-render = { path = "crates/rc-render" }
+rc-ui = { path = "crates/rc-ui" }
 rc-voxel = { path = "crates/rc-voxel" }
 rc-world = { path = "crates/rc-world" }
 

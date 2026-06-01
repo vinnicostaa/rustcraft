@@ -1,5 +1,5 @@
 [package]
-name = "rustcraft"
+name = "rc-interaction"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,12 +7,10 @@ publish.workspace = true
 
 [dependencies]
 bevy.workspace = true
-rc-input.workspace = true
-rc-interaction.workspace = true
 rc-inventory.workspace = true
 rc-player.workspace = true
 rc-render.workspace = true
-rc-ui.workspace = true
+rc-voxel.workspace = true
 rc-world.workspace = true
 
 [lints]

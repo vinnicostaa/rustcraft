@@ -4012,6 +4012,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "rc-interaction"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-inventory",
+ "rc-player",
+ "rc-render",
+ "rc-voxel",
+ "rc-world",
+]
+
+[[package]]
+name = "rc-inventory"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-voxel",
+]
+
+[[package]]
 name = "rc-player"
 version = "0.1.0"
 dependencies = [
@@ -4024,6 +4044,15 @@ name = "rc-render"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rc-voxel",
+]
+
+[[package]]
+name = "rc-ui"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rc-inventory",
  "rc-voxel",
 ]
 
@@ -4186,9 +4215,11 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "rc-input",
+ "rc-interaction",
+ "rc-inventory",
  "rc-player",
  "rc-render",
- "rc-voxel",
+ "rc-ui",
  "rc-world",
 ]
 
