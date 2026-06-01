@@ -9,6 +9,7 @@ publish.workspace = true
 bevy.workspace = true
 rc-inventory.workspace = true
 rc-voxel.workspace = true
+rc-interaction.workspace = true
 
 [lints]
 workspace = true

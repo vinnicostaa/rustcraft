@@ -27,7 +27,6 @@ pub(crate) struct AimedBlockRaycastParams<'w, 's> {
 pub(crate) fn update_aimed_block(
     params: AimedBlockRaycastParams,
     mut ray_cast: MeshRayCast,
-    mut gizmos: Gizmos,
     mut aimed_block: ResMut<AimedBlock>,
 ) {
     aimed_block.clear();
@@ -45,9 +44,6 @@ pub(crate) fn update_aimed_block(
     let settings = MeshRayCastSettings::default()
         .with_filter(&filter)
         .with_visibility(RayCastVisibility::Visible);
-
-    let ray_end = ray.origin + ray.direction * PLAYER_REACH;
-    gizmos.line(ray.origin, ray_end, Color::srgb(1.0, 0.8, 0.0));
 
     let Some((_, hit)) = ray_cast.cast_ray(ray, &settings).first() else {
         return;

@@ -11,4 +11,4 @@ mod plugin;
 mod raycast;
 
 pub use aimed_block::{AimedBlock, AimedBlockHit};
-pub use plugin::InteractionPlugin;
+pub use plugin::{InteractionPlugin, InteractionSet};

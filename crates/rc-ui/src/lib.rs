@@ -4,6 +4,7 @@
 //! `rc-inventory`, e desenha a interface com Bevy UI. Ela não altera mundo nem
 //! decide regras de inventário.
 
+mod crosshair;
 mod hotbar;
 mod plugin;
 
