@@ -14,7 +14,7 @@ mod remesh;
 mod spawn;
 
 pub use chunk_map::{ChunkEntry, ChunkMap};
-pub use components::{Block, GeneratedChunk, GeneratedChunkBlock};
+pub use components::GeneratedChunk;
 pub use config::{WorldConfig, WorldSeed};
 pub use generation::{TerrainGenerator, generate_chunk, terrain_height};
 pub use plugin::WorldPlugin;

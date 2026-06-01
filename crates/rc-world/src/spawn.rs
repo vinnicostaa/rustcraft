@@ -1,6 +1,6 @@
 use bevy::diagnostic::Diagnostics;
 use bevy::prelude::*;
-use rc_render::{BlockRenderAssets, RenderConfig, build_chunk_mesh_data};
+use rc_render::{ChunkRenderAssets, RenderConfig, build_chunk_mesh_data};
 use rc_voxel::ChunkCoord;
 
 use crate::{
@@ -18,7 +18,7 @@ pub(crate) fn spawn_initial_chunk(
     mut meshes: ResMut<Assets<Mesh>>,
     mut diagnostics: Diagnostics,
     mut chunk_map: ResMut<ChunkMap>,
-    block_assets: Res<BlockRenderAssets>,
+    chunk_assets: Res<ChunkRenderAssets>,
     render_config: Res<RenderConfig>,
     world_config: Res<WorldConfig>,
 ) {
@@ -47,7 +47,7 @@ pub(crate) fn spawn_initial_chunk(
         .spawn((
             GeneratedChunk { coord: chunk_coord },
             Mesh3d(chunk_mesh),
-            MeshMaterial3d(block_assets.chunk_material()),
+            MeshMaterial3d(chunk_assets.chunk_material()),
             Transform::from_xyz(
                 origin.x as f32 * block_size,
                 origin.y as f32 * block_size,

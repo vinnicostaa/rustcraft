@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{RenderConfig, assets::setup_block_assets, lighting::setup_lighting};
+use crate::{RenderConfig, assets::setup_chunk_assets, lighting::setup_lighting};
 
 /// Set de startup para preparação dos assets de render.
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -18,7 +18,7 @@ impl Plugin for RenderPlugin {
             .configure_sets(Startup, RenderStartupSet::PrepareAssets)
             .add_systems(
                 Startup,
-                (setup_lighting, setup_block_assets).in_set(RenderStartupSet::PrepareAssets),
+                (setup_lighting, setup_chunk_assets).in_set(RenderStartupSet::PrepareAssets),
             );
     }
 }
