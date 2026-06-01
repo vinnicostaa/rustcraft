@@ -68,8 +68,8 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 - `rc-inventory`: seleção mínima de bloco e base para inventário.
 - `rc-player`: player, camera e movimento.
 - `rc-voxel`: dados voxel puros, sem Bevy.
-- `rc-render`: assets, materiais, iluminacao e mesh Bevy.
-- `rc-ui`: HUD/UI de gameplay, incluindo hotbar visual.
+- `rc-render`: assets por chunk, materiais, iluminacao e mesh Bevy.
+- `rc-ui`: HUD/UI de gameplay, incluindo hotbar visual e mira/crosshair.
 - `rc-world`: configuracao, geracao e spawn do mundo.
 
 ## Estado tecnico atual
@@ -81,5 +81,6 @@ cargo clippy -p rc-render --all-targets --all-features -- -D warnings
 - `ChunkMap` registra chunks carregados, entidade renderizavel e flag dirty; quebrar bloco altera dado de chunk e reconstrói a mesh.
 - `rc-inventory::SelectedBlock` permite seleção mínima de bloco com `1`/`2`/`3`; clique direito coloca o bloco selecionado e marca o chunk dirty.
 - `rc-interaction::AimedBlock` guarda o bloco mirado atual; `rc-interaction` aplica quebra/colocação apenas no estado ativo informado pelo app.
-- A hotbar visual mínima já existe em `rc-ui` usando Bevy UI nativo.
-- As proximas frentes tecnicas provaveis sao inventario por item, estado persistente de bloco mirado, UI de pause/menu e atlas/array texture sem voltar ao spawn por bloco.
+- A hotbar visual mínima e a mira/crosshair já existem em `rc-ui` usando Bevy UI nativo.
+- O caminho legado de entidade/material por bloco comum foi removido; `rc-render` expõe assets por chunk.
+- As proximas frentes tecnicas provaveis sao inventario por item, UI de pause/menu e atlas/array texture sem voltar ao spawn por bloco.

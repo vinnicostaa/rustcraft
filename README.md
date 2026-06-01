@@ -47,6 +47,7 @@ Este repositório usa Cargo workspace para deixar o projeto pronto para crescer 
     │       └── slots.rs
     ├── rc-ui/              # HUD e UI de gameplay
     │   └── src/
+    │       ├── crosshair.rs
     │       ├── hotbar.rs
     │       ├── lib.rs
     │       └── plugin.rs
@@ -148,7 +149,7 @@ Implementado:
 - camada de input semântico separada de teclado físico;
 - seleção mínima de bloco isolada em `rc-inventory`, com slots `1`/`2`/`3` para grama, terra e pedra;
 - interação de bloco isolada em `rc-interaction`, com raycast, `AimedBlock`, quebra e colocação mínima;
-- hotbar visual isolada em `rc-ui`, lendo `rc-inventory::SelectedBlock`;
+- HUD de gameplay isolado em `rc-ui`, com hotbar visual lendo `rc-inventory::SelectedBlock` e mira/crosshair lendo `rc-interaction::AimedBlock`;
 - `GameState` mínimo (`InGame`/`Paused`) controlando captura/liberação de cursor e sistemas de interação;
 - `PlayerControlState` em `rc-player` para pausar mouse look/movimento sem acoplar o player ao estado do app;
 - câmera/player com mouse look e movimento WASD + Space/Shift relativo à direção atual;
@@ -165,14 +166,14 @@ Implementado:
 - raycast de interação a partir da câmera/player, com conversão para `BlockPos`, estado `AimedBlock` e highlight debug do bloco mirado;
 - quebra de bloco com clique esquerdo, alterando o dado do chunk e reconstruindo a mesh;
 - hotbar visual mínima com Bevy UI nativo, mostrando slots `1`/`2`/`3` e destaque do bloco selecionado;
+- mira/crosshair visual mínima com Bevy UI nativo, mudando cor quando há bloco mirado;
 - colocação mínima de bloco com clique direito, usando o bloco selecionado e marcando o chunk dirty;
-- assets compartilhados para mesh/material de blocos em crate render.
+- assets compartilhados de render por chunk em `rc-render`, sem manter o caminho legado de entidade/material por bloco comum.
 
 Limitações atuais:
 
 - vertex colors ainda são uma etapa visual temporária; atlas de textura ou array texture entram depois;
 - ainda não há inventário por item, quantidades ou itens reais;
-- `AimedBlock` existe, mas ainda não há UI/crosshair consumindo o estado de bloco mirado;
 - o pause ainda não tem UI própria; `Esc` alterna diretamente entre gameplay e pausa;
 - diagnósticos próprios ainda cobrem apenas o chunk inicial;
 - ainda não há greedy meshing, atlas de textura ou culling próprio por chunk;
